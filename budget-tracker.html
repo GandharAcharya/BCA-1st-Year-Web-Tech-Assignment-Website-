@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinView - Budget Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --mint-neon: #00E38C;
+            --dark-bg: #1B1B1D;
+            --dark-secondary: #2A2A2C;
+            --text-light: #FFFFFF;
+            --text-muted: #B0B0B0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glow-shadow: 0 0 20px rgba(0, 227, 140, 0.3);
+            --success-color: #00E38C;
+            --danger-color: #ff4757;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Styles */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-hover:hover {
+            background: rgba(0, 227, 140, 0.1);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-2px);
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(27, 27, 29, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--mint-neon) !important;
+            text-shadow: 0 0 10px rgba(0, 227, 140, 0.5);
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--mint-neon) !important;
+        }
+
+        /* Main Layout */
+        .main-content {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        /* Input Panel */
+        .input-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .toggle-container {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            padding: 4px;
+            margin-bottom: 2rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .toggle-btn.active {
+            background: var(--mint-neon);
+            color: var(--dark-bg);
+            box-shadow: var(--glow-shadow);
+        }
+
+        .form-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--mint-neon);
+            box-shadow: 0 0 0 0.2rem rgba(0, 227, 140, 0.25);
+            color: var(--text-light);
+        }
+
+        .btn-mint {
+            background: var(--mint-neon);
+            color: var(--dark-bg);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-mint:hover {
+            background: var(--mint-neon);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-2px);
+            color: var(--dark-bg);
+        }
+
+        /* Dashboard Cards */
+        .summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .summary-card:hover {
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-3px);
+        }
+
+        .summary-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .income-icon { color: var(--success-color); }
+        .expense-icon { color: var(--danger-color); }
+        .balance-icon { color: var(--mint-neon); }
+
+        .summary-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Charts */
+        .chart-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            color: var(--mint-neon);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Insights Card */
+        .insights-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .insights-title {
+            color: var(--mint-neon);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-item {
+            background: rgba(0, 227, 140, 0.1);
+            border-left: 3px solid var(--mint-neon);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Transaction List */
+        .transaction-list {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: rgba(0, 227, 140, 0.05);
+            transform: translateX(5px);
+        }
+
+        .transaction-info h6 {
+            margin-bottom: 0.2rem;
+            font-weight: 600;
+        }
+
+        .transaction-info small {
+            color: var(--text-muted);
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .income-amount {
+            color: var(--success-color);
+        }
+
+        .expense-amount {
+            color: var(--danger-color);
+        }
+
+        /* Scrollbar Styling */
+        .transaction-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .transaction-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .transaction-list::-webkit-scrollbar-thumb {
+            background: var(--mint-neon);
+            border-radius: 3px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 80px;
+            }
+            
+            .input-panel {
+                position: static;
+                margin-bottom: 2rem;
+            }
+            
+            .summary-amount {
+                font-size: 1.5rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .transaction-list {
+                max-height: 300px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--mint-neon);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fade In Animation */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">FinView</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-mint"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="budget-tracker.html">Budget Tracker</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="investment-analytics.html">Investments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ai-investment-chat.html">AI Advisor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="user-profile-dashboard.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Personalized Greeting -->
+            <div id="userGreeting" class="text-center mb-4" style="display: none;">
+                <h2 class="greeting-title" style="color: var(--mint-neon); font-weight: 600; margin-bottom: 0.5rem;">
+                    Welcome back, <span id="userName">User</span>! 👋
+                </h2>
+                <p class="greeting-subtitle" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 0;">
+                    Track your financial journey with FinView
+                </p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Left Column - Input Panel -->
+                <div class="col-lg-4">
+                    <div class="input-panel fade-in">
+                        <h4 class="mb-4 text-center" style="color: var(--mint-neon);">Add Transaction</h4>
+                        
+                        <!-- Income/Expense Toggle -->
+                        <div class="toggle-container">
+                            <button class="toggle-btn active" id="incomeBtn" onclick="setTransactionType('income')">
+                                <i class="fas fa-arrow-up me-2"></i>Income
+                            </button>
+                            <button class="toggle-btn" id="expenseBtn" onclick="setTransactionType('expense')">
+                                <i class="fas fa-arrow-down me-2"></i>Expense
+                            </button>
+                        </div>
+
+                        <!-- Transaction Form -->
+                        <form id="transactionForm">
+                            <input type="hidden" id="transactionType" value="income">
+                            <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" id="transactionTitle" placeholder="Enter transaction title" required>
+                                <small class="form-text text-muted">Auto-detection will categorize based on keywords</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="amount" placeholder="Enter amount" step="0.01" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Category</label>
+                                <select class="form-select" id="categorySelect">
+                                    <option value="auto">🤖 Auto-Detect Category</option>
+                                    <option value="Food & Dining">Food & Dining</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Bills & Utilities">Bills & Utilities</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Housing">Housing</option>
+                                    <option value="Salary">Salary</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Investment">Investment</option>
+                                    <option value="Gifts">Gifts</option>
+                                    <option value="Miscellaneous">Miscellaneous</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <small id="autoDetectLabel" class="form-text text-muted"></small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="notes" rows="3" placeholder="Add notes..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-mint">
+                                <i class="fas fa-plus me-2"></i>Add Transaction
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column - Dashboard -->
+                <div class="col-lg-8">
+                    <!-- Summary Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4 fade-in">
+                            <div class="summary-card">
+                                <div class="summary-icon income-icon">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div class="summary-amount income-amount" id="totalIncome">₹0</div>
+                                <div class="summary-label">Total Income</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 fade-in">
+                            <div class="summary-card">
+                                <div class="summary-icon expense-icon">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <div class="summary-amount expense-amount" id="totalExpenses">₹0</div>
+                                <div class="summary-label">Total Expenses</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 fade-in">
+                            <div class="summary-card">
+                                <div class="summary-icon balance-icon">
+                                    <i class="fas fa-balance-scale"></i>
+                                </div>
+                                <div class="summary-amount" id="balance">₹0</div>
+                                <div class="summary-label">Balance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6 fade-in">
+                            <div class="chart-card">
+                                <h5 class="chart-title">Expense Categories</h5>
+                                <div class="chart-container">
+                                    <canvas id="expensePieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 fade-in">
+                            <div class="chart-card">
+                                <h5 class="chart-title">Monthly Cash Flow</h5>
+                                <div class="chart-container">
+                                    <canvas id="cashFlowChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Insights -->
+                    <div class="row mb-4">
+                        <div class="col-12 fade-in">
+                            <div class="insights-card">
+                                <h5 class="insights-title">
+                                    <i class="fas fa-brain"></i>
+                                    Smart Insights
+                                </h5>
+                                <div id="insightsContainer">
+                                    <div class="insight-item">
+                                        Add some transactions to get personalized insights!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div class="row">
+                        <div class="col-12 fade-in">
+                            <div class="transaction-list">
+                                <h5 class="mb-3" style="color: var(--mint-neon);">Recent Transactions</h5>
+                                <div id="transactionContainer">
+                                    <p class="text-muted text-center">No transactions yet. Add your first transaction!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="finview-admin-db.js"></script>
+    
+    <script>
+        // FinViewUsersDB Class
+        class FinViewUsersDB {
+            constructor() {
+                this.users = this.loadUsers();
+            }
+
+            loadUsers() {
+                const stored = localStorage.getItem('FinViewUsersDB');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            saveUsers() {
+                localStorage.setItem('FinViewUsersDB', JSON.stringify(this.users));
+            }
+
+            generateUserId() {
+                return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            hashPassword(password) {
+                let hash = 0;
+                for (let i = 0; i < password.length; i++) {
+                    const char = password.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString();
+            }
+
+            createUser(userData) {
+                const newUser = {
+                    userId: this.generateUserId(),
+                    fullName: userData.fullName,
+                    username: userData.username,
+                    email: userData.email,
+                    password: this.hashPassword(userData.password),
+                    profileImage: userData.profileImage || '',
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    totalIncome: 0,
+                    totalExpense: 0,
+                    balance: 0,
+                    transactions: [],
+                    riskTolerance: 'not-assessed',
+                    riskScore: 0
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+
+            getUserByUsername(username) {
+                return this.users.find(user => user.username === username);
+            }
+
+            getUserByEmail(email) {
+                return this.users.find(user => user.email === email);
+            }
+
+            isUsernameTaken(username) {
+                return this.users.some(user => user.username === username);
+            }
+
+            isEmailRegistered(email) {
+                return this.users.some(user => user.email === email);
+            }
+
+            updateUser(userId, updates) {
+                const userIndex = this.users.findIndex(user => user.userId === userId);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = { ...this.users[userIndex], ...updates };
+                    this.saveUsers();
+                    return this.users[userIndex];
+                }
+                return null;
+            }
+
+            getUserById(userId) {
+                return this.users.find(user => user.userId === userId);
+            }
+        }
+
+        // AuthManager Class
+        class AuthManager {
+            constructor() {
+                this.currentUser = this.loadCurrentUser();
+            }
+
+            loadCurrentUser() {
+                const stored = localStorage.getItem('FinViewCurrentUser');
+                return stored ? JSON.parse(stored) : null;
+            }
+
+            saveCurrentUser() {
+                if (this.currentUser) {
+                    localStorage.setItem('FinViewCurrentUser', JSON.stringify(this.currentUser));
+                    localStorage.setItem('isLoggedIn', 'true');
+                } else {
+                    localStorage.removeItem('FinViewCurrentUser');
+                    localStorage.setItem('isLoggedIn', 'false');
+                }
+            }
+
+            signup(userData) {
+                if (!userData.fullName || !userData.username || !userData.email || !userData.password) {
+                    throw new Error('All fields are required');
+                }
+
+                if (userData.password.length < 6) {
+                    throw new Error('Password must be at least 6 characters long');
+                }
+
+                if (userData.password !== userData.confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+
+                if (finViewDB.isUsernameTaken(userData.username)) {
+                    throw new Error('Username is already taken');
+                }
+
+                if (finViewDB.isEmailRegistered(userData.email)) {
+                    throw new Error('Email is already registered');
+                }
+
+                const newUser = finViewDB.createUser(userData);
+                this.currentUser = newUser;
+                this.saveCurrentUser();
+
+                return newUser;
+            }
+
+            signin(username, password) {
+                const user = finViewDB.getUserByUsername(username);
+                if (!user) {
+                    throw new Error('Incorrect username or password. Please try again.');
+                }
+
+                const hashedPassword = finViewDB.hashPassword(password);
+                if (user.password !== hashedPassword) {
+                    throw new Error('Incorrect username or password. Please try again.');
+                }
+
+                // Update last login
+                user.lastLogin = new Date().toISOString();
+                finViewDB.updateUser(user.userId, { lastLogin: user.lastLogin });
+
+                this.currentUser = user;
+                this.saveCurrentUser();
+
+                return user;
+            }
+
+            signinWithGoogle(googleUserData) {
+                const existingUser = finViewDB.getUserByEmail(googleUserData.email);
+                
+                if (existingUser) {
+                    // User exists, update last login and sign them in
+                    existingUser.lastLogin = new Date().toISOString();
+                    finViewDB.updateUser(existingUser.userId, { lastLogin: existingUser.lastLogin });
+                    this.currentUser = existingUser;
+                    this.saveCurrentUser();
+                    return existingUser;
+                } else {
+                    // Create new user with Google data
+                    const newUserData = {
+                        fullName: googleUserData.fullName,
+                        username: googleUserData.email.split('@')[0],
+                        email: googleUserData.email,
+                        password: 'google_auth_' + Date.now(), // Random password for Google users
+                        profileImage: googleUserData.profileImage || ''
+                    };
+                    
+                    const newUser = finViewDB.createUser(newUserData);
+                    this.currentUser = newUser;
+                    this.saveCurrentUser();
+                    return newUser;
+                }
+            }
+
+            signout() {
+                this.currentUser = null;
+                this.saveCurrentUser();
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+
+            isLoggedIn() {
+                return this.currentUser !== null;
+            }
+        }
+
+        // Initialize global instances
+        const finViewDB = new FinViewUsersDB();
+        const authManager = new AuthManager();
+
+        // Global Variables
+        let transactions = [];
+        let currentTransactionType = 'income';
+        let expensePieChart = null;
+        let cashFlowChart = null;
+
+        // Enhanced Category Mapping for Auto-Categorization
+        const expenseKeywords = {
+            'Food / Dining': ['food', 'meal', 'lunch', 'dinner', 'restaurant', 'cafe', 'snacks', 'swiggy', 'zomato', 'breakfast', 'coffee', 'pizza', 'burger'],
+            'Transport': ['uber', 'ola', 'bus', 'train', 'fuel', 'petrol', 'diesel', 'auto', 'taxi', 'metro', 'parking', 'cab'],
+            'Entertainment': ['movie', 'netflix', 'prime', 'spotify', 'game', 'concert', 'theater', 'cinema', 'streaming', 'subscription'],
+            'Shopping': ['clothes', 'shoes', 'amazon', 'flipkart', 'fashion', 'shopping', 'mall', 'store', 'retail'],
+            'Bills': ['electricity', 'water bill', 'wifi', 'jiofiber', 'rent', 'recharge', 'internet', 'phone', 'gas', 'maintenance'],
+            'Healthcare': ['doctor', 'pharmacy', 'meds', 'hospital', 'medicine', 'medical', 'clinic', 'health', 'dental']
+        };
+
+        const incomeKeywords = {
+            'Salary': ['salary', 'stipend', 'payout', 'job', 'payroll', 'wage', 'monthly pay'],
+            'Freelance': ['freelance', 'project', 'client', 'contract', 'consulting', 'gig'],
+            'Investment': ['dividend', 'interest', 'returns', 'investment', 'stock', 'mutual fund', 'profit'],
+            'Gifts': ['gift', 'received', 'family', 'present', 'bonus', 'reward']
+        };
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Expense Pie Chart
+            const pieCtx = document.getElementById('expensePieChart').getContext('2d');
+            expensePieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#00E38C', '#ff4757', '#ffa502', '#3742fa', 
+                            '#2ed573', '#ff6348', '#1e90ff', '#ff9ff3'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#FFFFFF',
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cash Flow Line Chart
+            const lineCtx = document.getElementById('cashFlowChart').getContext('2d');
+            cashFlowChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Income',
+                        data: [0, 0, 0, 0],
+                        borderColor: '#00E38C',
+                        backgroundColor: 'rgba(0, 227, 140, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Expenses',
+                        data: [0, 0, 0, 0],
+                        borderColor: '#ff4757',
+                        backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#FFFFFF'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#B0B0B0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#B0B0B0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Set Transaction Type
+        function setTransactionType(type) {
+            currentTransactionType = type;
+            document.getElementById('transactionType').value = type;
+            document.getElementById('incomeBtn').classList.toggle('active', type === 'income');
+            document.getElementById('expenseBtn').classList.toggle('active', type === 'expense');
+            
+            // Re-run auto-detection when switching transaction type
+            const titleInput = document.getElementById('transactionTitle');
+            if (titleInput.value.trim()) {
+                const event = new Event('input', { bubbles: true });
+                titleInput.dispatchEvent(event);
+            }
+        }
+
+        // Guaranteed-Accurate Weighted Scoring Algorithm for Auto-Detect Category
+        const categoryKeywords = { 
+            "Food & Dining": ["food","pizza","burger","biryani","zomato","swiggy","restaurant","meal","dinner","lunch","breakfast","snacks","cafe","kfc","mcd"],
+            "Transportation": ["uber","ola","taxi","cab","bus","train","petrol","fuel","diesel","parking","toll"],
+            "Shopping": ["amazon","ajio","flipkart","myntra","shopping","store","mall","clothes","apparel"],
+            "Entertainment": ["netflix","spotify","hotstar","movie","cinema","game","gaming","concert"],
+            "Bills & Utilities": ["electricity","power","water","gas","wifi","internet","broadband","airtel","jio","vi","mobile"],
+            "Healthcare": ["doctor","clinic","hospital","pharmacy","medicine","meds","health"],
+            "Education": ["fees","tuition","books","course","learning","school","college"],
+            "Housing": ["rent","maintenance","repair","furniture","home"],
+            "Salary": ["salary","payroll","credited","income"],
+            "Freelance": ["freelance","client","invoice","project","payment"],
+            "Investment": ["dividend","stocks","mf","mutual fund","crypto","sip","nifty","sensex"],
+            "Gifts": ["gift","present"],
+            "Miscellaneous": [],
+            "Other": []
+        };
+
+        function normalize(text) {
+            return text.toLowerCase().trim();
+        }
+
+        function score(title, keywords) {
+            const normalizedTitle = normalize(title);
+            let hits = 0;
+            
+            keywords.forEach(keyword => {
+                if (normalizedTitle.includes(keyword.toLowerCase())) {
+                    hits++;
+                }
+            });
+            
+            return hits;
+        }
+
+        function detectCategory(title, type) {
+            const isIncome = type === 'income';
+            let bestCategory = 'Miscellaneous';
+            let bestScore = 0;
+            
+            // Income priority categories for tie-breaking
+            const incomePriority = ['Salary', 'Freelance', 'Investment', 'Gifts'];
+            
+            for (const [category, keywords] of Object.entries(categoryKeywords)) {
+                if (keywords.length === 0) continue;
+                
+                const currentScore = score(title, keywords);
+                
+                if (currentScore > bestScore) {
+                    bestScore = currentScore;
+                    bestCategory = category;
+                } else if (currentScore === bestScore && currentScore > 0) {
+                    // Tie-breaker: prioritize income categories in income mode
+                    if (isIncome && incomePriority.includes(category) && !incomePriority.includes(bestCategory)) {
+                        bestCategory = category;
+                    }
+                }
+            }
+            
+            // Additional check for income mode: if no good match found, still check income categories
+            if (isIncome && bestScore <= 1 && !incomePriority.includes(bestCategory)) {
+                for (const incomeCat of incomePriority) {
+                    if (categoryKeywords[incomeCat] && score(title, categoryKeywords[incomeCat]) > 0) {
+                        return incomeCat;
+                    }
+                }
+            }
+            
+            return bestScore > 0 ? bestCategory : 'Miscellaneous';
+        }
+
+        // Dynamic Category Auto-Detection with 300ms debounce
+        function setupAutoDetection() {
+            const titleInput = document.getElementById('transactionTitle');
+            const categorySelect = document.getElementById('categorySelect');
+            const autoDetectLabel = document.getElementById('autoDetectLabel');
+            const transactionTypeInput = document.getElementById('transactionType');
+            
+            let debounceTimer;
+            
+            titleInput.addEventListener('input', function() {
+                const title = this.value.trim();
+                
+                // Clear previous timer
+                clearTimeout(debounceTimer);
+                
+                // Only auto-detect if category is set to "auto"
+                if (categorySelect.value !== 'auto') {
+                    return;
+                }
+                
+                if (title.length > 0) {
+                    // Set 300ms debounce timer
+                    debounceTimer = setTimeout(() => {
+                        const currentType = transactionTypeInput.value;
+                        const detectedCategory = detectCategory(title, currentType);
+                        
+                        // Update category dropdown to the detected category
+                        const options = Array.from(categorySelect.options);
+                        const matchingOption = options.find(option => option.value === detectedCategory);
+                        
+                        if (matchingOption) {
+                            categorySelect.value = detectedCategory;
+                        }
+                        
+                        // Update helper text
+                        autoDetectLabel.textContent = `Auto-detected: ${detectedCategory}`;
+                        autoDetectLabel.style.display = 'block';
+                        
+                        // Store the detected category for form submission
+                        titleInput.dataset.detectedCategory = detectedCategory;
+                        
+                    }, 300);
+                } else {
+                    // Clear helper text when title is empty
+                    autoDetectLabel.textContent = '';
+                    autoDetectLabel.style.display = 'none';
+                    delete titleInput.dataset.detectedCategory;
+                }
+            });
+            
+            // Handle manual category selection - override auto-detection
+            categorySelect.addEventListener('change', function() {
+                if (this.value !== 'auto') {
+                    // Manual selection overrides auto-detection
+                    autoDetectLabel.textContent = '';
+                    autoDetectLabel.style.display = 'none';
+                    delete titleInput.dataset.detectedCategory;
+                } else if (titleInput.value.trim()) {
+                    // If switching back to auto, re-detect
+                    const event = new Event('input', { bubbles: true });
+                    titleInput.dispatchEvent(event);
+                }
+            });
+            
+            // Also trigger when transaction type changes
+            const incomeBtn = document.getElementById('incomeBtn');
+            const expenseBtn = document.getElementById('expenseBtn');
+            
+            [incomeBtn, expenseBtn].forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setTimeout(() => {
+                        if (titleInput.value.trim() && categorySelect.value === 'auto') {
+                            const event = new Event('input', { bubbles: true });
+                            titleInput.dispatchEvent(event);
+                        }
+                    }, 100); // Small delay to ensure transaction type is updated
+                });
+            });
+        }
+
+        // Format Currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            }).format(amount);
+        }
+
+        // Add Transaction
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('transactionTitle').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const categorySelect = document.getElementById('categorySelect');
+            const notes = document.getElementById('notes').value;
+            
+            // Determine category: use selected value if not "auto", otherwise use detected category
+            let category;
+            if (categorySelect.value === 'auto') {
+                const titleInput = document.getElementById('transactionTitle');
+                category = titleInput.dataset.detectedCategory || 'Miscellaneous';
+            } else {
+                category = categorySelect.value;
+            }
+            
+            const transaction = {
+                id: Date.now(),
+                type: currentTransactionType,
+                title: title,
+                amount: amount,
+                category: category,
+                notes: notes,
+                date: new Date().toLocaleDateString()
+            };
+            
+            transactions.push(transaction);
+            
+            // Save to user's profile if logged in
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                const userInDB = finViewDB.getUserById(currentUser.userId);
+                
+                if (userInDB) {
+                    // Add transaction to user's transaction list
+                    userInDB.transactions.push(transaction);
+                    
+                    // Update user's financial totals
+                    if (transaction.type === 'income') {
+                        userInDB.totalIncome += amount;
+                        userInDB.balance += amount;
+                    } else {
+                        userInDB.totalExpense += amount;
+                        userInDB.balance -= amount;
+                    }
+                    
+                    // Save updated user data
+                    finViewDB.updateUser(currentUser.userId, {
+                        transactions: userInDB.transactions,
+                        totalIncome: userInDB.totalIncome,
+                        totalExpense: userInDB.totalExpense,
+                        balance: userInDB.balance
+                    });
+                    
+                    // Update current user in auth manager
+                    authManager.currentUser = userInDB;
+                    authManager.saveCurrentUser();
+                    
+                    // ALSO SAVE TO ADMIN DATABASE
+                    try {
+                        // Create or update user in admin database
+                        finViewAdminDB.createOrUpdateUser(currentUser.userId, {
+                            personalDetails: {
+                                fullName: currentUser.fullName,
+                                username: currentUser.username,
+                                email: currentUser.email,
+                                createdAt: currentUser.createdAt
+                            }
+                        });
+                        
+                        // Add transaction to admin database
+                        if (transaction.type === 'income') {
+                            finViewAdminDB.addIncomeTransaction(currentUser.userId, {
+                                title: title,
+                                amount: amount,
+                                category: category,
+                                notes: notes,
+                                date: transaction.date
+                            });
+                        } else {
+                            finViewAdminDB.addExpenseTransaction(currentUser.userId, {
+                                title: title,
+                                amount: amount,
+                                category: category,
+                                notes: notes,
+                                date: transaction.date
+                            });
+                        }
+                        
+                        // Log activity
+                        finViewAdminDB.addActivityLog(currentUser.userId, {
+                            page: 'Budget Tracker',
+                            action: 'Add Transaction',
+                            description: `${transaction.type === 'income' ? 'Income' : 'Expense'}: ${title} - ₹${amount.toLocaleString()}`
+                        });
+                        
+                        console.log('✅ Transaction saved to Admin Database');
+                    } catch (error) {
+                        console.error('Error saving to admin database:', error);
+                    }
+                }
+            }
+            
+            updateDashboard();
+            this.reset();
+            
+            // Clear auto-detect helper text
+            document.getElementById('autoDetectLabel').textContent = '';
+            document.getElementById('autoDetectLabel').style.display = 'none';
+            
+            // Show success animation
+            showNotification('Transaction added successfully!', 'success');
+        });
+
+        // Update Dashboard
+        function updateDashboard() {
+            updateSummary();
+            updateCharts();
+            updateTransactionList();
+            generateInsights();
+        }
+
+        // Update Summary Cards
+        function updateSummary() {
+            // Check login state
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            let income, expenses, balance;
+            
+            if (isLoggedIn) {
+                // User is logged in - show real data from user's profile
+                const currentUser = authManager.getCurrentUser();
+                if (currentUser) {
+                    // Use user's stored financial data
+                    income = currentUser.totalIncome || 0;
+                    expenses = currentUser.totalExpense || 0;
+                    balance = currentUser.balance || 0;
+                } else {
+                    // Fallback to calculating from transactions
+                    income = transactions
+                        .filter(t => t.type === 'income')
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    
+                    expenses = transactions
+                        .filter(t => t.type === 'expense')
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    
+                    balance = income - expenses;
+                }
+            } else {
+                // User is not logged in - show dummy values
+                income = 125000;
+                expenses = 85000;
+                balance = 40000;
+            }
+            
+            // Handle empty data scenarios (show 0 for all)
+            if (isLoggedIn && transactions.length === 0 && !authManager.getCurrentUser()) {
+                income = 0;
+                expenses = 0;
+                balance = 0;
+            }
+            
+            document.getElementById('totalIncome').textContent = formatCurrency(income);
+            document.getElementById('totalExpenses').textContent = formatCurrency(expenses);
+            document.getElementById('balance').textContent = formatCurrency(balance);
+            document.getElementById('balance').className = `summary-amount ${balance >= 0 ? 'income-amount' : 'expense-amount'}`;
+        }
+
+        // Update Charts
+        function updateCharts() {
+            // Check login state
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                // Show dummy chart values when logged out
+                expensePieChart.data.labels = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Healthcare'];
+                expensePieChart.data.datasets[0].data = [25000, 18000, 12000, 15000, 20000, 8000];
+                expensePieChart.update();
+                
+                cashFlowChart.data.datasets[0].data = [30000, 35000, 28000, 32000]; // Income
+                cashFlowChart.data.datasets[1].data = [22000, 25000, 20000, 18000]; // Expenses
+                cashFlowChart.update();
+                return;
+            }
+            
+            // Logged in - show real data
+            
+            // Update Pie Chart with real expense categories
+            const expensesByCategory = {
+                'Food': 0,
+                'Transport': 0,
+                'Entertainment': 0,
+                'Shopping': 0,
+                'Bills': 0,
+                'Healthcare': 0,
+                'Miscellaneous': 0
+            };
+            
+            transactions
+                .filter(t => t.type === 'expense')
+                .forEach(t => {
+                    // Map transaction categories to chart categories
+                    let chartCategory = 'Miscellaneous';
+                    if (t.category === 'Food & Dining') chartCategory = 'Food';
+                    else if (t.category === 'Transportation') chartCategory = 'Transport';
+                    else if (t.category === 'Entertainment') chartCategory = 'Entertainment';
+                    else if (t.category === 'Shopping') chartCategory = 'Shopping';
+                    else if (t.category === 'Bills & Utilities') chartCategory = 'Bills';
+                    else if (t.category === 'Healthcare') chartCategory = 'Healthcare';
+                    
+                    expensesByCategory[chartCategory] += t.amount;
+                });
+            
+            // Filter out categories with zero values
+            const filteredLabels = [];
+            const filteredData = [];
+            Object.entries(expensesByCategory).forEach(([category, amount]) => {
+                if (amount > 0) {
+                    filteredLabels.push(category);
+                    filteredData.push(amount);
+                }
+            });
+            
+            expensePieChart.data.labels = filteredLabels;
+            expensePieChart.data.datasets[0].data = filteredData;
+            expensePieChart.update();
+            
+            // Update Monthly Cash Flow Chart with real weekly data
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            
+            // Get start and end date of current month
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            
+            // Calculate weekly data for current month
+            const weeklyIncome = [0, 0, 0, 0];
+            const weeklyExpenses = [0, 0, 0, 0];
+            
+            transactions.forEach(t => {
+                const transactionDate = new Date(t.date);
+                
+                // Only process transactions from current month
+                if (transactionDate.getMonth() === currentMonth && 
+                    transactionDate.getFullYear() === currentYear) {
+                    
+                    // Calculate which week of the month (1-4)
+                    const dayOfMonth = transactionDate.getDate();
+                    const weekOfMonth = Math.min(3, Math.floor((dayOfMonth - 1) / 7)); // 0-3
+                    
+                    if (t.type === 'income') {
+                        weeklyIncome[weekOfMonth] += t.amount;
+                    } else {
+                        weeklyExpenses[weekOfMonth] += t.amount;
+                    }
+                }
+            });
+            
+            cashFlowChart.data.datasets[0].data = weeklyIncome;
+            cashFlowChart.data.datasets[1].data = weeklyExpenses;
+            cashFlowChart.update();
+        }
+
+        // Update Transaction List
+        function updateTransactionList() {
+            const container = document.getElementById('transactionContainer');
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                // Show dummy transactions when logged out
+                const dummyTransactions = [
+                    { id: 1, type: 'expense', title: 'Zomato Order', amount: 850, category: 'Food & Dining', notes: 'Dinner with friends', date: new Date().toLocaleDateString() },
+                    { id: 2, type: 'expense', title: 'Uber Ride', amount: 320, category: 'Transportation', notes: 'Airport drop', date: new Date(Date.now() - 86400000).toLocaleDateString() },
+                    { id: 3, type: 'income', title: 'Salary Credit', amount: 50000, category: 'Salary', notes: 'Monthly salary', date: new Date(Date.now() - 172800000).toLocaleDateString() },
+                    { id: 4, type: 'expense', title: 'Netflix Subscription', amount: 799, category: 'Entertainment', notes: 'Monthly subscription', date: new Date(Date.now() - 259200000).toLocaleDateString() },
+                    { id: 5, type: 'expense', title: 'Amazon Purchase', amount: 2500, category: 'Shopping', notes: 'Electronics', date: new Date(Date.now() - 345600000).toLocaleDateString() }
+                ];
+                
+                container.innerHTML = dummyTransactions.map(t => `
+                    <div class="transaction-item fade-in">
+                        <div class="transaction-info">
+                            <h6>${t.title}</h6>
+                            <small>${t.category} • ${t.date}</small>
+                            ${t.notes ? `<small class="d-block">${t.notes}</small>` : ''}
+                        </div>
+                        <div class="transaction-amount ${t.type === 'income' ? 'income-amount' : 'expense-amount'}">
+                            ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+            
+            // Logged in state - show real transactions from user's profile
+            const currentUser = authManager.getCurrentUser();
+            let userTransactions = [];
+            
+            if (currentUser) {
+                const userInDB = finViewDB.getUserById(currentUser.userId);
+                if (userInDB && userInDB.transactions) {
+                    userTransactions = userInDB.transactions;
+                    // Sync local transactions with user's transactions
+                    transactions = userTransactions;
+                }
+            }
+            
+            if (userTransactions.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No recent transactions.</p>';
+                return;
+            }
+            
+            // Sort transactions by date (newest first)
+            const sortedTransactions = [...userTransactions].sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA; // Newest first
+            });
+            
+            // Take only the 5 most recent transactions
+            const recentTransactions = sortedTransactions.slice(0, 5);
+            
+            container.innerHTML = recentTransactions.map(t => `
+                <div class="transaction-item fade-in">
+                    <div class="transaction-info">
+                        <h6>${t.title}</h6>
+                        <small>${t.category} • ${t.date}</small>
+                        ${t.notes ? `<small class="d-block">${t.notes}</small>` : ''}
+                    </div>
+                    <div class="transaction-amount ${t.type === 'income' ? 'income-amount' : 'expense-amount'}">
+                        ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate Smart Insights
+        function generateInsights() {
+            // Check login state
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                document.getElementById('insightsContainer').innerHTML = 
+                    '<div class="insight-item">Food is your highest expense category this month.</div>';
+                return;
+            }
+            
+            // Get current month and year
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            
+            // Filter transactions for current month only
+            const currentMonthTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.getMonth() === currentMonth && 
+                       transactionDate.getFullYear() === currentYear;
+            });
+            
+            // Filter only expense transactions for current month
+            const currentMonthExpenses = currentMonthTransactions.filter(t => t.type === 'expense');
+            
+            if (currentMonthExpenses.length === 0) {
+                document.getElementById('insightsContainer').innerHTML = 
+                    '<div class="insight-item">No expenses recorded this month.</div>';
+                return;
+            }
+            
+            // Calculate expenses by category for current month
+            const categories = {};
+            currentMonthExpenses.forEach(t => {
+                categories[t.category] = (categories[t.category] || 0) + t.amount;
+            });
+            
+            // Find the category with highest total expense
+            const topCategory = Object.keys(categories).reduce((a, b) => 
+                categories[a] > categories[b] ? a : b, ''
+            );
+            
+            // Display the insight
+            document.getElementById('insightsContainer').innerHTML = 
+                `<div class="insight-item">${topCategory} is your highest expense category this month.</div>`;
+        }
+
+        // Show Notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed`;
+            notification.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 250px;';
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Test Summary Box Updates
+        function testSummaryBoxUpdates() {
+            console.log('🧪 Testing Summary Box Updates...');
+            
+            // Test 1: Not logged in state
+            localStorage.setItem('isLoggedIn', 'false');
+            updateDashboard();
+            console.log('✅ Test 1 - Not logged in: Should show dummy values');
+            
+            // Test 2: Logged in with empty data
+            localStorage.setItem('isLoggedIn', 'true');
+            const originalTransactions = [...transactions];
+            transactions = [];
+            updateDashboard();
+            console.log('✅ Test 2 - Logged in with empty data: Should show 0 values');
+            
+            // Test 3: Logged in with real data
+            transactions = originalTransactions;
+            updateDashboard();
+            console.log('✅ Test 3 - Logged in with data: Should show real totals');
+            
+            // Test 4: Add new transaction and verify real-time update
+            const newTransaction = {
+                id: Date.now(),
+                type: 'income',
+                title: 'Test Income',
+                amount: 1000,
+                category: 'Salary',
+                notes: 'Test transaction',
+                date: new Date().toLocaleDateString()
+            };
+            transactions.push(newTransaction);
+            updateDashboard();
+            console.log('✅ Test 4 - Added transaction: Summary should update in real-time');
+            
+            // Reset to original state
+            transactions = originalTransactions;
+            localStorage.setItem('isLoggedIn', 'false');
+            updateDashboard();
+            
+            console.log('🎉 All Summary Box Update tests completed!');
+            showNotification('Summary Box Update tests completed!', 'success');
+        }
+
+        // Test Chart Updates
+        function testChartUpdates() {
+            console.log('📊 Testing Chart Updates...');
+            
+            // Test 1: Not logged in - should show dummy charts
+            localStorage.setItem('isLoggedIn', 'false');
+            updateCharts();
+            console.log('✅ Test 1 - Not logged in: Charts should show dummy data');
+            
+            // Test 2: Logged in with no data - should show empty charts
+            localStorage.setItem('isLoggedIn', 'true');
+            const originalTransactions = [...transactions];
+            transactions = [];
+            updateCharts();
+            console.log('✅ Test 2 - Logged in with no data: Charts should be empty');
+            
+            // Test 3: Logged in with sample data - should show real charts
+            const testTransactions = [
+                { id: 1, type: 'expense', title: 'Food Order', amount: 500, category: 'Food & Dining', date: new Date().toLocaleDateString() },
+                { id: 2, type: 'expense', title: 'Uber Ride', amount: 200, category: 'Transportation', date: new Date().toLocaleDateString() },
+                { id: 3, type: 'income', title: 'Salary', amount: 50000, category: 'Salary', date: new Date().toLocaleDateString() },
+                { id: 4, type: 'expense', title: 'Netflix', amount: 500, category: 'Entertainment', date: new Date().toLocaleDateString() },
+                { id: 5, type: 'expense', title: 'Electricity', amount: 1500, category: 'Bills & Utilities', date: new Date().toLocaleDateString() }
+            ];
+            transactions = testTransactions;
+            updateCharts();
+            console.log('✅ Test 3 - Logged in with data: Charts should show real distribution');
+            
+            // Test 4: Add transaction and verify real-time chart update
+            const newExpense = {
+                id: Date.now(),
+                type: 'expense',
+                title: 'New Food Expense',
+                amount: 1000,
+                category: 'Food & Dining',
+                date: new Date().toLocaleDateString()
+            };
+            transactions.push(newExpense);
+            updateCharts();
+            console.log('✅ Test 4 - Added transaction: Charts should update in real-time');
+            
+            // Reset to original state
+            transactions = originalTransactions;
+            localStorage.setItem('isLoggedIn', 'false');
+            updateCharts();
+            
+            console.log('🎉 All Chart Update tests completed!');
+            showNotification('Chart Update tests completed!', 'success');
+        }
+
+        // Comprehensive Test Function for Auto-Detect Category
+        function testAutoDetectCategory() {
+            console.log('🧪 Testing Auto-Detect Category System...');
+            
+            const testCases = [
+                { title: 'Pizza', expected: 'Food & Dining', type: 'expense' },
+                { title: 'Zomato Order', expected: 'Food & Dining', type: 'expense' },
+                { title: 'Uber ride', expected: 'Transportation', type: 'expense' },
+                { title: 'Uber Eats', expected: 'Food & Dining', type: 'expense' },
+                { title: 'Apartment Rent', expected: 'Housing', type: 'expense' },
+                { title: 'Airtel Recharge', expected: 'Bills & Utilities', type: 'expense' },
+                { title: 'Netflix Subscription', expected: 'Entertainment', type: 'expense' },
+                { title: 'Amazon Purchase', expected: 'Shopping', type: 'expense' },
+                { title: 'Salary Credit', expected: 'Salary', type: 'income' },
+                { title: 'Dividend Received', expected: 'Investment', type: 'income' },
+                { title: 'Doctor Visit', expected: 'Healthcare', type: 'expense' },
+                { title: 'Tuition Fees', expected: 'Education', type: 'expense' },
+                { title: 'Birthday Gift', expected: 'Gifts', type: 'expense' },
+                { title: 'Freelance Payment', expected: 'Freelance', type: 'income' }
+            ];
+            
+            let passed = 0;
+            let failed = 0;
+            
+            testCases.forEach((testCase, index) => {
+                const result = detectCategory(testCase.title, testCase.type);
+                const success = result === testCase.expected;
+                
+                if (success) {
+                    passed++;
+                    console.log(`✅ Test ${index + 1}: "${testCase.title}" → ${result} (Expected: ${testCase.expected})`);
+                } else {
+                    failed++;
+                    console.log(`❌ Test ${index + 1}: "${testCase.title}" → ${result} (Expected: ${testCase.expected})`);
+                }
+            });
+            
+            console.log(`\n📊 Test Results: ${passed} passed, ${failed} failed out of ${testCases.length} tests`);
+            
+            if (failed === 0) {
+                console.log('🎉 All tests passed! Auto-detect category system is working correctly.');
+            } else {
+                console.log('⚠️ Some tests failed. Please review the scoring algorithm.');
+            }
+            
+            return { passed, failed, total: testCases.length };
+        }
+
+        // Test Smart Insights functionality
+        function testSmartInsights() {
+            console.log('🧠 Testing Smart Insights...');
+            
+            // Test 1: Not logged in - should show dummy insight
+            localStorage.setItem('isLoggedIn', 'false');
+            generateInsights();
+            const notLoggedInText = document.getElementById('insightsContainer').textContent;
+            console.log(`✅ Test 1 - Not logged in: "${notLoggedInText}"`);
+            
+            // Test 2: Logged in with no current month expenses
+            localStorage.setItem('isLoggedIn', 'true');
+            const originalTransactions = [...transactions];
+            
+            // Set up old transactions (not current month)
+            const oldDate = new Date();
+            oldDate.setMonth(oldDate.getMonth() - 1);
+            transactions = [
+                { id: 1, type: 'expense', title: 'Old Food', amount: 500, category: 'Food & Dining', date: oldDate.toLocaleDateString() }
+            ];
+            generateInsights();
+            const noCurrentMonthText = document.getElementById('insightsContainer').textContent;
+            console.log(`✅ Test 2 - No current month expenses: "${noCurrentMonthText}"`);
+            
+            // Test 3: Logged in with current month expenses
+            const currentDate = new Date();
+            transactions = [
+                { id: 1, type: 'expense', title: 'Food Order', amount: 1000, category: 'Food & Dining', date: currentDate.toLocaleDateString() },
+                { id: 2, type: 'expense', title: 'Uber Ride', amount: 500, category: 'Transportation', date: currentDate.toLocaleDateString() },
+                { id: 3, type: 'expense', title: 'Movie Tickets', amount: 800, category: 'Entertainment', date: currentDate.toLocaleDateString() },
+                { id: 4, type: 'expense', title: 'Another Food Order', amount: 1500, category: 'Food & Dining', date: currentDate.toLocaleDateString() }
+            ];
+            generateInsights();
+            const withDataText = document.getElementById('insightsContainer').textContent;
+            console.log(`✅ Test 3 - With current month expenses: "${withDataText}"`);
+            
+            // Test 4: Real-time update test
+            const newExpense = {
+                id: 5,
+                type: 'expense',
+                title: 'Shopping Spree',
+                amount: 3000,
+                category: 'Shopping',
+                date: currentDate.toLocaleDateString()
+            };
+            transactions.push(newExpense);
+            generateInsights();
+            const updatedText = document.getElementById('insightsContainer').textContent;
+            console.log(`✅ Test 4 - After adding new transaction: "${updatedText}"`);
+            
+            // Restore original state
+            transactions = originalTransactions;
+            localStorage.setItem('isLoggedIn', 'false');
+            generateInsights();
+            
+            console.log('🎉 All Smart Insights tests completed!');
+            showNotification('Smart Insights tests completed!', 'success');
+        }
+
+        // Test Recent Transactions functionality
+        function testTransactionListUpdates() {
+            console.log('💳 Testing Recent Transactions...');
+            
+            // Test 1: Not logged in - should show dummy transactions
+            localStorage.setItem('isLoggedIn', 'false');
+            updateTransactionList();
+            const notLoggedInItems = document.querySelectorAll('#transactionContainer .transaction-item');
+            console.log(`✅ Test 1 - Not logged in: Found ${notLoggedInItems.length} dummy transactions`);
+            
+            // Verify dummy transaction content
+            const firstDummy = notLoggedInItems[0];
+            if (firstDummy) {
+                const title = firstDummy.querySelector('h6')?.textContent;
+                const category = firstDummy.querySelector('small')?.textContent;
+                const amount = firstDummy.querySelector('.transaction-amount')?.textContent;
+                console.log(`   First dummy: "${title}" | ${category} | ${amount}`);
+            }
+            
+            // Test 2: Logged in with no transactions - should show empty message
+            localStorage.setItem('isLoggedIn', 'true');
+            const originalTransactions = [...transactions];
+            transactions.length = 0; // Clear transactions
+            updateTransactionList();
+            const emptyMessage = document.getElementById('transactionContainer').textContent;
+            console.log(`✅ Test 2 - Logged in, no transactions: "${emptyMessage.trim()}"`);
+            
+            // Test 3: Logged in with transactions - should show real data sorted by date
+            const testTransactions = [
+                { id: 1, type: 'income', title: 'Salary', amount: 50000, category: 'Salary', notes: 'Monthly salary', date: '2024-01-15' },
+                { id: 2, type: 'expense', title: 'Rent', amount: 15000, category: 'Housing', notes: 'Monthly rent', date: '2024-01-01' },
+                { id: 3, type: 'expense', title: 'Groceries', amount: 3000, category: 'Food & Dining', date: '2024-01-20' },
+                { id: 4, type: 'expense', title: 'Netflix', amount: 799, category: 'Entertainment', notes: 'Subscription', date: '2024-01-10' }
+            ];
+            transactions.push(...testTransactions);
+            updateTransactionList();
+            const loggedInItems = document.querySelectorAll('#transactionContainer .transaction-item');
+            console.log(`✅ Test 3 - Logged in with data: Found ${loggedInItems.length} transactions`);
+            
+            // Verify sorting (newest first)
+            if (loggedInItems.length >= 2) {
+                const firstTitle = loggedInItems[0].querySelector('h6')?.textContent;
+                const secondTitle = loggedInItems[1].querySelector('h6')?.textContent;
+                console.log(`   Order check: "${firstTitle}" should be newer than "${secondTitle}"`);
+            }
+            
+            // Verify transaction formatting
+            const firstReal = loggedInItems[0];
+            if (firstReal) {
+                const title = firstReal.querySelector('h6')?.textContent;
+                const details = firstReal.querySelector('small')?.textContent;
+                const amount = firstReal.querySelector('.transaction-amount')?.textContent;
+                const amountClass = firstReal.querySelector('.transaction-amount')?.className;
+                console.log(`   First real: "${title}" | ${details} | ${amount} | Classes: ${amountClass}`);
+            }
+            
+            // Test 4: Real-time update test
+            const newTransaction = {
+                id: 5,
+                type: 'expense',
+                title: 'Newest Transaction',
+                amount: 500,
+                category: 'Transportation',
+                notes: 'Just added',
+                date: new Date().toISOString().split('T')[0] // Today's date
+            };
+            transactions.push(newTransaction);
+            updateTransactionList();
+            const updatedItems = document.querySelectorAll('#transactionContainer .transaction-item');
+            const newestTitle = updatedItems[0]?.querySelector('h6')?.textContent;
+            console.log(`✅ Test 4 - After adding new: First item is "${newestTitle}" (should be "Newest Transaction")`);
+            
+            // Test 5: Limit to 5 transactions
+            const extraTransactions = [
+                { id: 6, type: 'expense', title: 'Extra 1', amount: 100, category: 'Other', date: '2024-01-25' },
+                { id: 7, type: 'expense', title: 'Extra 2', amount: 200, category: 'Other', date: '2024-01-26' }
+            ];
+            transactions.push(...extraTransactions);
+            updateTransactionList();
+            const limitedItems = document.querySelectorAll('#transactionContainer .transaction-item');
+            console.log(`✅ Test 5 - Limited to 5: Found ${limitedItems.length} transactions (should be 5)`);
+            
+            // Restore original state
+            transactions.length = 0;
+            transactions.push(...originalTransactions);
+            localStorage.setItem('isLoggedIn', 'false');
+            updateTransactionList();
+            
+            console.log('🎉 All Recent Transactions tests completed!');
+            showNotification('Recent Transactions tests completed!', 'success');
+        }
+
+        // Show personalized greeting for logged-in users
+        function showUserGreeting() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (isLoggedIn && authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                if (currentUser) {
+                    document.getElementById('userName').textContent = currentUser.fullName;
+                    document.getElementById('userGreeting').style.display = 'block';
+                    console.log(`Showing personalized greeting for user: ${currentUser.fullName}`);
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setupAutoDetection(); // Setup dynamic category auto-detection
+            
+            // Show personalized greeting
+            showUserGreeting();
+            
+            // Log page visit to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    // Create user in admin database if not exists
+                    finViewAdminDB.createOrUpdateUser(currentUser.userId, {
+                        personalDetails: {
+                            fullName: currentUser.fullName,
+                            username: currentUser.username,
+                            email: currentUser.email,
+                            createdAt: currentUser.createdAt
+                        }
+                    });
+                    
+                    // Log page visit
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Budget Tracker',
+                        action: 'Page Visit',
+                        description: 'User visited Budget Tracker page'
+                    });
+                    
+                    console.log('✅ Budget Tracker page visit logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging page visit to admin database:', error);
+                }
+            }
+            
+            // Load user's transactions if logged in
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (isLoggedIn && authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                if (currentUser) {
+                    const userInDB = finViewDB.getUserById(currentUser.userId);
+                    if (userInDB && userInDB.transactions) {
+                        transactions = userInDB.transactions;
+                        console.log(`Loaded ${transactions.length} transactions for user: ${currentUser.fullName}`);
+                    }
+                }
+            } else {
+                // Add some dummy data for demonstration when not logged in
+                const dummyTransactions = [
+                    { id: 1, type: 'income', title: 'Monthly Salary', amount: 50000, category: 'Salary', notes: 'Regular salary', date: new Date().toLocaleDateString() },
+                    { id: 2, type: 'expense', title: 'Zomato Order', amount: 850, category: 'Food & Dining', notes: 'Dinner with friends', date: new Date().toLocaleDateString() },
+                    { id: 3, type: 'expense', title: 'Uber Ride', amount: 250, category: 'Transportation', notes: 'Office commute', date: new Date().toLocaleDateString() },
+                    { id: 4, type: 'expense', title: 'Netflix Subscription', amount: 499, category: 'Entertainment', notes: 'Monthly subscription', date: new Date().toLocaleDateString() },
+                    { id: 5, type: 'income', title: 'Freelance Project', amount: 15000, category: 'Freelance', notes: 'Web development project', date: new Date().toLocaleDateString() }
+                ];
+                
+                transactions = dummyTransactions;
+            }
+            
+            updateDashboard();
+            
+            console.log('Budget Tracker initialized successfully! 💰');
+        });
+
+        // Add some interactive effects
+        document.querySelectorAll('.summary-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

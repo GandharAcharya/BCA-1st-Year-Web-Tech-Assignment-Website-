@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinView - Investment Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --dark-bg: #0d1117;
+            --dark-secondary: #161b22;
+            --dark-border: #30363d;
+            --mint-neon: #00E38C;
+            --mint-glow: rgba(0, 227, 140, 0.3);
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --success-color: #00E38C;
+            --danger-color: #ff4757;
+            --warning-color: #ffa502;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--dark-secondary);
+            border-bottom: 1px solid var(--dark-border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--mint-neon) !important;
+            text-shadow: 0 0 10px var(--mint-glow);
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--mint-neon) !important;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+        }
+
+        /* Asset Category Tabs */
+        .category-tabs {
+            display: flex;
+            background: var(--dark-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--dark-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn.active {
+            background: var(--mint-neon);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--mint-glow);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(0, 227, 140, 0.1);
+            color: var(--mint-neon);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Asset Cards */
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .asset-card {
+            background: var(--dark-secondary);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--mint-neon);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--mint-neon);
+        }
+
+        .asset-card:hover::before {
+            opacity: 1;
+        }
+
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .asset-info h5 {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            color: var(--text-primary);
+        }
+
+        .asset-symbol {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .asset-price {
+            text-align: right;
+        }
+
+        .current-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .price-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .price-change.positive {
+            background: rgba(0, 227, 140, 0.2);
+            color: var(--success-color);
+        }
+
+        .price-change.negative {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger-color);
+        }
+
+        /* Sparkline Chart */
+        .sparkline-container {
+            height: 60px;
+            margin: 1rem 0;
+        }
+
+        /* Risk Meter */
+        .risk-meter {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .risk-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .risk-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .risk-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .risk-low { background: var(--success-color); width: 30%; }
+        .risk-medium { background: var(--warning-color); width: 60%; }
+        .risk-high { background: var(--danger-color); width: 90%; }
+
+        .risk-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 40px;
+        }
+
+        .risk-low-text { color: var(--success-color); }
+        .risk-medium-text { color: var(--warning-color); }
+        .risk-high-text { color: var(--danger-color); }
+
+        /* Detailed Asset Section */
+        .asset-detail {
+            background: var(--dark-secondary);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .asset-detail.active {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-detail:hover {
+            color: var(--mint-neon);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .detail-card h6 {
+            color: var(--mint-neon);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .trend-arrow {
+            font-size: 1.2rem;
+        }
+
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+
+        /* Recommendations */
+        .recommendations {
+            background: var(--dark-secondary);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .recommendations h4 {
+            color: var(--mint-neon);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendation-item {
+            background: rgba(0, 227, 140, 0.1);
+            border: 1px solid var(--mint-neon);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            background: rgba(0, 227, 140, 0.15);
+            transform: translateX(5px);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-symbol {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rec-confidence {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .confidence-high {
+            background: rgba(0, 227, 140, 0.2);
+            color: var(--success-color);
+        }
+
+        .confidence-medium {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--warning-color);
+        }
+
+        .rec-reason {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-potential {
+            font-size: 0.8rem;
+            color: var(--mint-neon);
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .asset-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .category-tabs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .tab-btn {
+                text-align: center;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--mint-neon);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fade In Animation */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">FinView</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-mint"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget-tracker.html">Budget Tracker</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="investment-analytics.html">Investments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ai-investment-chat.html">AI Advisor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="user-profile-dashboard.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="container">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="text-center mb-4 fade-in" style="color: var(--mint-neon);">Investment Analytics Dashboard</h2>
+                </div>
+            </div>
+
+            <!-- Asset Category Tabs -->
+            <div class="category-tabs fade-in">
+                <button class="tab-btn active" data-category="stocks">
+                    <i class="fas fa-chart-line me-2"></i>Stocks
+                </button>
+                <button class="tab-btn" data-category="forex">
+                    <i class="fas fa-exchange-alt me-2"></i>Forex
+                </button>
+                <button class="tab-btn" data-category="crypto">
+                    <i class="fab fa-bitcoin me-2"></i>Crypto
+                </button>
+                <button class="tab-btn" data-category="funds">
+                    <i class="fas fa-pie-chart me-2"></i>Index Funds
+                </button>
+            </div>
+
+            <!-- Asset Detail Section (Hidden by default) -->
+            <div id="assetDetail" class="asset-detail">
+                <div class="detail-header">
+                    <div>
+                        <h4 id="detailAssetName">Asset Name</h4>
+                        <p id="detailAssetSymbol" class="text-muted mb-0">SYMBOL</p>
+                    </div>
+                    <button class="close-detail" onclick="closeAssetDetail()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="detail-grid">
+                    <div class="detail-card">
+                        <h6>Short-term Trend</h6>
+                        <div class="trend-indicator">
+                            <i class="fas fa-arrow-up trend-arrow trend-up"></i>
+                            <span>Bullish momentum expected</span>
+                        </div>
+                        <p class="text-muted small">Next 1-2 weeks outlook based on technical indicators</p>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h6>Long-term Outlook</h6>
+                        <div class="trend-indicator">
+                            <i class="fas fa-chart-line trend-arrow trend-up"></i>
+                            <span>Positive long-term growth</span>
+                        </div>
+                        <p class="text-muted small">6-12 months fundamental analysis</p>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h6>Analyst Sentiment</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Buy</span>
+                            <span class="text-success fw-bold">65%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Hold</span>
+                            <span class="text-warning fw-bold">25%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Sell</span>
+                            <span class="text-danger fw-bold">10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="stocksTab" class="tab-content active">
+                <div class="asset-grid" id="stocksGrid">
+                    <!-- Stocks will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="forexTab" class="tab-content">
+                <div class="asset-grid" id="forexGrid">
+                    <!-- Forex will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="cryptoTab" class="tab-content">
+                <div class="asset-grid" id="cryptoGrid">
+                    <!-- Crypto will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="fundsTab" class="tab-content">
+                <div class="asset-grid" id="fundsGrid">
+                    <!-- Index Funds will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="recommendations fade-in">
+                <h4>
+                    <i class="fas fa-star"></i>
+                    Top 3 Assets to Watch
+                </h4>
+                <div id="recommendationsContainer">
+                    <!-- Recommendations will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Dummy Asset Data
+        const assetData = {
+            stocks: [
+                {
+                    name: "Apple Inc.",
+                    symbol: "AAPL",
+                    price: 178.45,
+                    change: 2.34,
+                    changePercent: 1.33,
+                    risk: "medium",
+                    sparklineData: [175, 176.5, 177.2, 176.8, 177.5, 178.45]
+                },
+                {
+                    name: "Microsoft Corp.",
+                    symbol: "MSFT",
+                    price: 412.67,
+                    change: -3.21,
+                    changePercent: -0.77,
+                    risk: "low",
+                    sparklineData: [415, 414.5, 413.8, 414.2, 413.5, 412.67]
+                },
+                {
+                    name: "Tesla Inc.",
+                    symbol: "TSLA",
+                    price: 245.89,
+                    change: 8.76,
+                    changePercent: 3.70,
+                    risk: "high",
+                    sparklineData: [238, 240.5, 242.8, 244.2, 243.5, 245.89]
+                },
+                {
+                    name: "Amazon.com Inc.",
+                    symbol: "AMZN",
+                    price: 156.78,
+                    change: 1.23,
+                    changePercent: 0.79,
+                    risk: "medium",
+                    sparklineData: [155, 155.5, 156.2, 156.8, 156.5, 156.78]
+                }
+            ],
+            forex: [
+                {
+                    name: "EUR/USD",
+                    symbol: "EURUSD",
+                    price: 1.0876,
+                    change: 0.0023,
+                    changePercent: 0.21,
+                    risk: "low",
+                    sparklineData: [1.085, 1.086, 1.0865, 1.087, 1.0873, 1.0876]
+                },
+                {
+                    name: "GBP/USD",
+                    symbol: "GBPUSD",
+                    price: 1.2654,
+                    change: -0.0045,
+                    changePercent: -0.35,
+                    risk: "medium",
+                    sparklineData: [1.269, 1.268, 1.267, 1.266, 1.2658, 1.2654]
+                },
+                {
+                    name: "USD/JPY",
+                    symbol: "USDJPY",
+                    price: 149.85,
+                    change: 0.67,
+                    changePercent: 0.45,
+                    risk: "medium",
+                    sparklineData: [149.2, 149.4, 149.6, 149.7, 149.8, 149.85]
+                },
+                {
+                    name: "USD/INR",
+                    symbol: "USDINR",
+                    price: 83.24,
+                    change: -0.15,
+                    changePercent: -0.18,
+                    risk: "low",
+                    sparklineData: [83.4, 83.35, 83.3, 83.28, 83.26, 83.24]
+                }
+            ],
+            crypto: [
+                {
+                    name: "Bitcoin",
+                    symbol: "BTC",
+                    price: 4215890,
+                    change: 85690,
+                    changePercent: 2.08,
+                    risk: "high",
+                    sparklineData: [4130000, 4160000, 4180000, 4195000, 4205000, 4215890]
+                },
+                {
+                    name: "Ethereum",
+                    symbol: "ETH",
+                    price: 245670,
+                    change: -3245,
+                    changePercent: -1.30,
+                    risk: "high",
+                    sparklineData: [248500, 247800, 247200, 246800, 246200, 245670]
+                },
+                {
+                    name: "Binance Coin",
+                    symbol: "BNB",
+                    price: 34567,
+                    change: 890,
+                    changePercent: 2.64,
+                    risk: "medium",
+                    sparklineData: [33700, 33900, 34100, 34300, 34400, 34567]
+                },
+                {
+                    name: "Cardano",
+                    symbol: "ADA",
+                    price: 45.67,
+                    change: 1.23,
+                    changePercent: 2.77,
+                    risk: "high",
+                    sparklineData: [44.5, 44.8, 45.1, 45.3, 45.5, 45.67]
+                }
+            ],
+            funds: [
+                {
+                    name: "NIFTY 50 ETF",
+                    symbol: "NIFTYBEES",
+                    price: 21847.50,
+                    change: -182.30,
+                    changePercent: -0.82,
+                    risk: "low",
+                    sparklineData: [22030, 21980, 21920, 21880, 21860, 21847.50]
+                },
+                {
+                    name: "SENSEX ETF",
+                    symbol: "SENSEX",
+                    price: 72845.67,
+                    change: 445.23,
+                    changePercent: 0.61,
+                    risk: "low",
+                    sparklineData: [72400, 72500, 72650, 72750, 72800, 72845.67]
+                },
+                {
+                    name: "Gold ETF",
+                    symbol: "GOLDBEES",
+                    price: 62450,
+                    change: 780,
+                    changePercent: 1.26,
+                    risk: "low",
+                    sparklineData: [61700, 61900, 62100, 62300, 62400, 62450]
+                },
+                {
+                    name: "NIFTY IT ETF",
+                    symbol: "ITBEES",
+                    price: 456.78,
+                    change: -8.90,
+                    changePercent: -1.91,
+                    risk: "medium",
+                    sparklineData: [465, 463, 461, 459, 458, 456.78]
+                }
+            ]
+        };
+
+        let currentCategory = 'stocks';
+        let currentAsset = null;
+        let sparklineCharts = {};
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            renderAssets('stocks');
+            generateRecommendations();
+            console.log('Investment Analytics Dashboard loaded successfully! 📈');
+        });
+
+        // Tab Switching
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    switchTab(category);
+                });
+            });
+        }
+
+        function switchTab(category) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+            // Update tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${category}Tab`).classList.add('active');
+
+            currentCategory = category;
+            renderAssets(category);
+            generateRecommendations();
+            
+            // Log category switch to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Investment Analytics',
+                        action: 'Switch Category',
+                        description: `Switched to ${category} category`,
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ Category switch logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging category switch to admin database:', error);
+                }
+            }
+            
+            // Close detail view when switching tabs
+            closeAssetDetail();
+        }
+
+        // Render Assets
+        function renderAssets(category) {
+            const grid = document.getElementById(`${category}Grid`);
+            const assets = assetData[category];
+            
+            grid.innerHTML = assets.map((asset, index) => `
+                <div class="asset-card fade-in" onclick="showAssetDetail('${category}', ${index})" style="animation-delay: ${index * 0.1}s">
+                    <div class="asset-header">
+                        <div class="asset-info">
+                            <h5>${asset.name}</h5>
+                            <div class="asset-symbol">${asset.symbol}</div>
+                        </div>
+                        <div class="asset-price">
+                            <div class="current-price">${formatPrice(asset.price, category)}</div>
+                            <div class="price-change ${asset.change >= 0 ? 'positive' : 'negative'}">
+                                ${asset.change >= 0 ? '+' : ''}${formatPrice(Math.abs(asset.change), category)} 
+                                (${asset.changePercent >= 0 ? '+' : ''}${asset.changePercent.toFixed(2)}%)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sparkline-container">
+                        <canvas id="sparkline-${category}-${index}"></canvas>
+                    </div>
+                    
+                    <div class="risk-meter">
+                        <span class="risk-label">Risk:</span>
+                        <div class="risk-bar">
+                            <div class="risk-fill risk-${asset.risk}"></div>
+                        </div>
+                        <span class="risk-text risk-${asset.risk}-text">${asset.risk.toUpperCase()}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Create sparkline charts
+            setTimeout(() => {
+                assets.forEach((asset, index) => {
+                    createSparkline(`sparkline-${category}-${index}`, asset.sparklineData, asset.change >= 0);
+                });
+            }, 100);
+        }
+
+        // Create Sparkline Chart
+        function createSparkline(canvasId, data, isPositive) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map((_, i) => i),
+                    datasets: [{
+                        data: data,
+                        borderColor: isPositive ? '#00E38C' : '#ff4757',
+                        backgroundColor: isPositive ? 'rgba(0, 227, 140, 0.1)' : 'rgba(255, 71, 87, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    elements: {
+                        point: { radius: 0 }
+                    }
+                }
+            });
+        }
+
+        // Show Asset Detail
+        function showAssetDetail(category, index) {
+            const asset = assetData[category][index];
+            currentAsset = asset;
+            
+            document.getElementById('detailAssetName').textContent = asset.name;
+            document.getElementById('detailAssetSymbol').textContent = asset.symbol;
+            document.getElementById('assetDetail').classList.add('active');
+            
+            // Log asset detail view to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Investment Analytics',
+                        action: 'View Asset Detail',
+                        description: `Viewed ${asset.name} (${asset.symbol}) details`,
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ Asset detail view logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging asset detail view to admin database:', error);
+                }
+            }
+            
+            // Scroll to detail section
+            document.getElementById('assetDetail').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        // Close Asset Detail
+        function closeAssetDetail() {
+            document.getElementById('assetDetail').classList.remove('active');
+            currentAsset = null;
+            
+            // Log asset detail close to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Investment Analytics',
+                        action: 'Close Asset Detail',
+                        description: 'Closed asset detail view',
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ Asset detail close logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging asset detail close to admin database:', error);
+                }
+            }
+        }
+
+        // Generate Recommendations
+        function generateRecommendations() {
+            const container = document.getElementById('recommendationsContainer');
+            const currentAssets = assetData[currentCategory];
+            
+            // Sort by positive change and lower risk for recommendations
+            const recommendations = [...currentAssets]
+                .filter(asset => asset.change > 0)
+                .sort((a, b) => {
+                    const riskOrder = { low: 3, medium: 2, high: 1 };
+                    return riskOrder[b.risk] - riskOrder[a.risk] || b.changePercent - a.changePercent;
+                })
+                .slice(0, 3);
+            
+            if (recommendations.length === 0) {
+                // Fallback to top performers
+                const topPerformers = [...currentAssets]
+                    .sort((a, b) => b.changePercent - a.changePercent)
+                    .slice(0, 3);
+                
+                container.innerHTML = topPerformers.map((asset, index) => `
+                    <div class="recommendation-item fade-in" style="animation-delay: ${index * 0.2}s">
+                        <div class="rec-header">
+                            <span class="rec-symbol">${asset.symbol}</span>
+                            <span class="rec-confidence confidence-medium">Medium Confidence</span>
+                        </div>
+                        <div class="rec-reason">
+                            Strong performance with ${asset.changePercent >= 0 ? '+' : ''}${asset.changePercent.toFixed(2)}% change
+                        </div>
+                        <div class="rec-potential">
+                            Potential upside: ${(asset.changePercent * 1.5).toFixed(1)}% in next 30 days
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = recommendations.map((asset, index) => `
+                    <div class="recommendation-item fade-in" style="animation-delay: ${index * 0.2}s">
+                        <div class="rec-header">
+                            <span class="rec-symbol">${asset.symbol}</span>
+                            <span class="rec-confidence confidence-high">High Confidence</span>
+                        </div>
+                        <div class="rec-reason">
+                            Positive momentum with ${asset.changePercent >= 0 ? '+' : ''}${asset.changePercent.toFixed(2)}% gain and ${asset.risk} risk profile
+                        </div>
+                        <div class="rec-potential">
+                            Potential upside: ${(asset.changePercent * 2).toFixed(1)}% in next 30 days
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Utility Functions
+        function formatPrice(price, category) {
+            if (category === 'forex') {
+                return price.toFixed(4);
+            } else if (category === 'crypto' && price > 1000) {
+                return '₹' + price.toLocaleString('en-IN');
+            } else if (category === 'crypto') {
+                return '₹' + price.toFixed(2);
+            } else if (category === 'funds' && price > 1000) {
+                return price.toLocaleString('en-IN');
+            } else if (category === 'stocks') {
+                return '$' + price.toFixed(2);
+            }
+            return price.toFixed(2);
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            // Simulate price updates
+            Object.keys(assetData).forEach(category => {
+                assetData[category].forEach(asset => {
+                    const changePercent = (Math.random() - 0.5) * 0.5;
+                    asset.changePercent += changePercent;
+                    asset.change = (asset.price * changePercent) / 100;
+                    asset.price += asset.change;
+                    
+                    // Update sparkline data
+                    asset.sparklineData.shift();
+                    asset.sparklineData.push(asset.price);
+                });
+            });
+            
+            renderAssets(currentCategory);
+            generateRecommendations();
+            
+            if (currentAsset) {
+                // Update detail view if open
+                showAssetDetail(currentCategory, assetData[currentCategory].findIndex(a => a.symbol === currentAsset.symbol));
+            }
+        }, 30000);
+
+        // Add hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.asset-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+
+        console.log('Investment Analytics Dashboard initialized! 🚀');
+        
+        // Log page visit to admin database
+        if (authManager.isLoggedIn()) {
+            const currentUser = authManager.getCurrentUser();
+            try {
+                finViewAdminDB.addActivityLog(currentUser.userId, {
+                    page: 'Investment Analytics',
+                    action: 'Page Visit',
+                    description: 'User visited Investment Analytics page',
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                });
+                console.log('✅ Investment Analytics page visit logged to Admin Database');
+            } catch (error) {
+                console.error('Error logging page visit to admin database:', error);
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+    <script src="finview-admin-db.js"></script>
+</body>
+</html>

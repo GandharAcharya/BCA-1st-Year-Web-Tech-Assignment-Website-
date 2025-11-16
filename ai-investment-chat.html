@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinView AI Investment Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-glass: rgba(26, 26, 26, 0.8);
+            --neon-mint: #00E38C;
+            --neon-glow: rgba(0, 227, 140, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-glow: rgba(0, 227, 140, 0.5);
+            --user-message: #00E38C;
+            --ai-message: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 227, 140, 0.2);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1050;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--neon-mint) !important;
+            text-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--neon-mint) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--neon-mint);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: var(--neon-mint);
+            font-size: 1.5rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            padding-top: 80px; /* Account for fixed navbar */
+        }
+
+        .main-container {
+            height: calc(100vh - 80px); /* Subtract navbar height */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neon-mint);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 20px var(--neon-glow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-mint);
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-mint);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(0, 227, 140, 0.2);
+            height: 100%; /* Ensure full height */
+        }
+
+        .chat-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 227, 140, 0.2);
+        }
+
+        .chat-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        #chatContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #chatMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #chatInputWrapper {
+            background: transparent !important;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            bottom: 0;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        #chatInputWrapper:focus-within {
+            border-top-color: var(--neon-mint);
+        }
+
+        #userMessage {
+            background: #1c1f26;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #userMessage:focus {
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+
+        #userMessage::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        #sendBtn {
+            background: var(--neon-mint);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: var(--neon-mint);
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageSlideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes messageSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: var(--ai-message);
+            color: var(--neon-mint);
+            border: 2px solid var(--neon-mint);
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .message.user .message-avatar {
+            background: var(--user-message);
+            color: var(--bg-primary);
+            border: 2px solid var(--user-message);
+            box-shadow: 0 0 10px rgba(0, 227, 140, 0.5);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 1rem 1.25rem;
+            border-radius: 18px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .message.ai .message-content {
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 227, 140, 0.3);
+            color: var(--text-primary);
+        }
+
+        .message.user .message-content {
+            background: var(--user-message);
+            color: var(--bg-primary);
+            font-weight: 500;
+        }
+
+        .message-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--neon-glow);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--neon-mint);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 227, 140, 0.2);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 25px;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(0, 227, 140, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 20px var(--neon-glow);
+            transform: translateY(-1px);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            background: var(--neon-mint);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(0, 227, 140, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 227, 140, 0.2);
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .risk-selector {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 227, 140, 0.2);
+        }
+
+        .risk-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .risk-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 227, 140, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .risk-btn:hover {
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 10px var(--neon-glow);
+            transform: translateY(-2px);
+        }
+
+        .risk-btn.active {
+            background: var(--neon-mint);
+            color: var(--bg-primary);
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        .suggestions {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .suggestions::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .suggestions::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .suggestions::-webkit-scrollbar-thumb {
+            background: var(--neon-mint);
+            border-radius: 3px;
+        }
+
+        .suggestion-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 227, 140, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-card:hover {
+            border-color: var(--neon-mint);
+            box-shadow: 0 8px 25px var(--neon-glow);
+            transform: translateY(-3px);
+        }
+
+        .suggestion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .suggestion-symbol {
+            color: var(--neon-mint);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .suggestion-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .suggestion-change {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .positive { color: var(--neon-mint); }
+        .negative { color: #ff4757; }
+
+        .suggestion-reason {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: var(--neon-mint);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--bg-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                position: relative;
+                height: 100%;
+            }
+
+            .sidebar {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                transform: translateX(100%);
+                z-index: 1000;
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            #chatMessages {
+                padding: 1rem;
+            }
+
+            #chatInputWrapper {
+                padding: 1rem;
+            }
+
+            #chatContainer {
+                height: calc(100vh - 160px); /* Account for both navbar and header */
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">FinView</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget-tracker.html">Budget Tracker</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="investment-analytics.html">Investments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="ai-investment-chat.html">AI Advisor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="user-profile-dashboard.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                FinView AI Assistant
+            </div>
+            <div class="ai-status">
+                <div class="status-dot"></div>
+                <span>AI Online</span>
+            </div>
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-chart-line me-2"></i>Risk Analysis
+            </button>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="chat-section">
+                <div class="chat-header">
+                    <div class="chat-title">Investment Assistant</div>
+                    <div class="chat-subtitle">Ask me anything about investments, market trends, or portfolio advice</div>
+                </div>
+
+                <div id="chatContainer" class="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
+                    <div id="chatMessages">
+                        <div class="message ai">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="typing-indicator" id="typingIndicator">
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                </div>
+                                <div id="messageText" style="display: none;">
+                                    Hello! I'm FinView's AI Investment Assistant. I can help you with investment advice, market analysis, and portfolio recommendations. 
+                                    <br><br>
+                                    Try selecting your risk tolerance on the right, or ask me anything about investments!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chatInputWrapper" class="p-3 border-t">
+                        <div class="d-flex gap-2">
+                            <input 
+                                id="userMessage" 
+                                class="form-control flex-grow-1" 
+                                placeholder="Ask anything about your finances…" />
+                            <button class="btn btn-success" id="sendBtn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Risk Assessment</div>
+                    <div class="sidebar-subtitle">Select your risk tolerance for personalized recommendations</div>
+                </div>
+
+                <div class="risk-selector">
+                    <div class="sidebar-title">Risk Tolerance</div>
+                    <div class="risk-buttons">
+                        <button class="risk-btn" data-risk="low" onclick="selectRisk('low')">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Low
+                        </button>
+                        <button class="risk-btn" data-risk="medium" onclick="selectRisk('medium')">
+                            <i class="fas fa-balance-scale me-1"></i>
+                            Medium
+                        </button>
+                        <button class="risk-btn" data-risk="high" onclick="selectRisk('high')">
+                            <i class="fas fa-rocket me-1"></i>
+                            High
+                        </button>
+                    </div>
+                </div>
+
+                <div class="suggestions" id="suggestions">
+                    <div class="sidebar-title">Suggested Investments</div>
+                    <div id="suggestionsList">
+                        <div class="suggestion-card fade-in">
+                            <div class="suggestion-header">
+                                <div class="suggestion-name">Select Risk Level</div>
+                                <div class="suggestion-symbol">💡</div>
+                            </div>
+                            <div class="suggestion-price">Personalized Picks</div>
+                            <div class="suggestion-change positive">Choose your risk tolerance above</div>
+                            <div class="suggestion-reason">
+                                I'll show you curated investment suggestions based on your risk profile and current market conditions.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FinView Users Database Class
+        class FinViewUsersDB {
+            constructor() {
+                this.users = this.loadUsers();
+            }
+
+            loadUsers() {
+                const stored = localStorage.getItem('FinViewUsersDB');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            saveUsers() {
+                localStorage.setItem('FinViewUsersDB', JSON.stringify(this.users));
+            }
+
+            addUser(userData) {
+                const existingUser = this.getUserByEmail(userData.email);
+                if (existingUser) {
+                    return null; // User already exists
+                }
+
+                const newUser = {
+                    userId: this.generateUserId(),
+                    ...userData,
+                    createdAt: new Date().toISOString(),
+                    transactions: [],
+                    totalIncome: 0,
+                    totalExpense: 0,
+                    balance: 0
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+
+            getUserByEmail(email) {
+                return this.users.find(user => user.email === email);
+            }
+
+            getUserById(userId) {
+                return this.users.find(user => user.userId === userId);
+            }
+
+            updateUser(userId, updates) {
+                const userIndex = this.users.findIndex(user => user.userId === userId);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = { ...this.users[userIndex], ...updates };
+                    this.saveUsers();
+                    return this.users[userIndex];
+                }
+                return null;
+            }
+
+            validateUser(email, password) {
+                const user = this.getUserByEmail(email);
+                if (user && user.password === password) {
+                    return user;
+                }
+                return null;
+            }
+
+            generateUserId() {
+                return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Google OAuth specific methods
+            addGoogleUser(googleUser) {
+                const existingUser = this.getUserByEmail(googleUser.email);
+                if (existingUser) {
+                    return existingUser; // Return existing user
+                }
+
+                const newUser = {
+                    userId: this.generateUserId(),
+                    name: googleUser.name,
+                    email: googleUser.email,
+                    profileImage: googleUser.picture,
+                    googleId: googleUser.id,
+                    authProvider: 'google',
+                    createdAt: new Date().toISOString(),
+                    transactions: [],
+                    totalIncome: 0,
+                    totalExpense: 0,
+                    balance: 0
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+        }
+
+        // Auth Manager Class
+        class AuthManager {
+            constructor() {
+                this.currentUser = this.loadCurrentUser();
+                this.finViewDB = new FinViewUsersDB();
+            }
+
+            loadCurrentUser() {
+                const stored = localStorage.getItem('FinViewCurrentUser');
+                return stored ? JSON.parse(stored) : null;
+            }
+
+            saveCurrentUser() {
+                if (this.currentUser) {
+                    localStorage.setItem('FinViewCurrentUser', JSON.stringify(this.currentUser));
+                } else {
+                    localStorage.removeItem('FinViewCurrentUser');
+                }
+            }
+
+            signUp(userData) {
+                const newUser = this.finViewDB.addUser(userData);
+                if (newUser) {
+                    this.currentUser = newUser;
+                    this.saveCurrentUser();
+                    return { success: true, user: newUser };
+                }
+                return { success: false, error: 'User already exists' };
+            }
+
+            signIn(email, password) {
+                const user = this.finViewDB.validateUser(email, password);
+                if (user) {
+                    this.currentUser = user;
+                    this.saveCurrentUser();
+                    return { success: true, user: user };
+                }
+                return { success: false, error: 'Invalid credentials' };
+            }
+
+            signInWithGoogle(googleUser) {
+                const user = this.finViewDB.addGoogleUser(googleUser);
+                if (user) {
+                    this.currentUser = user;
+                    this.saveCurrentUser();
+                    return { success: true, user: user };
+                }
+                return { success: false, error: 'Google sign-in failed' };
+            }
+
+            signOut() {
+                this.currentUser = null;
+                this.saveCurrentUser();
+                return true;
+            }
+
+            isLoggedIn() {
+                return this.currentUser !== null;
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+
+            updateCurrentUser(updates) {
+                if (this.currentUser) {
+                    const updatedUser = this.finViewDB.updateUser(this.currentUser.userId, updates);
+                    if (updatedUser) {
+                        this.currentUser = updatedUser;
+                        this.saveCurrentUser();
+                        return updatedUser;
+                    }
+                }
+                return null;
+            }
+        }
+
+        // Initialize FinView DB and Auth Manager
+        const finViewDB = new FinViewUsersDB();
+        const authManager = new AuthManager();
+
+        // Global variables
+        let conversation = [];
+        let currentRisk = null;
+        let isTyping = false;
+
+        // Investment data by risk level
+        const investmentData = {
+            low: [
+                {
+                    name: "Government Bonds",
+                    symbol: "GOVT",
+                    price: "₹1,024.50",
+                    change: "+0.15%",
+                    isPositive: true,
+                    reason: "Stable returns with government backing. Perfect for conservative investors seeking capital preservation."
+                },
+                {
+                    name: "Blue Chip Fund",
+                    symbol: "BLUECHIP",
+                    price: "₹156.80",
+                    change: "+0.42%",
+                    isPositive: true,
+                    reason: "Large-cap companies with consistent dividend history. Low volatility with steady growth potential."
+                },
+                {
+                    name: "Fixed Deposits",
+                    symbol: "FD",
+                    price: "7.2% p.a.",
+                    change: "Guaranteed",
+                    isPositive: true,
+                    reason: "Risk-free returns with guaranteed principal. Ideal for short-term financial goals."
+                },
+                {
+                    name: "Debt Mutual Fund",
+                    symbol: "DEBT",
+                    price: "₹1,847.30",
+                    change: "+0.08%",
+                    isPositive: true,
+                    reason: "Lower risk than equity funds. Provides regular income with minimal market exposure."
+                },
+                {
+                    name: "Gold ETF",
+                    symbol: "GOLD",
+                    price: "₹5,847.20",
+                    change: "+0.25%",
+                    isPositive: true,
+                    reason: "Traditional hedge against inflation. Provides portfolio diversification and stability."
+                },
+                {
+                    name: "REITs",
+                    symbol: "REALTY",
+                    price: "₹342.60",
+                    change: "+0.18%",
+                    isPositive: true,
+                    reason: "Real estate exposure without property management. Regular dividend income with lower risk."
+                }
+            ],
+            medium: [
+                {
+                    name: "Balanced Fund",
+                    symbol: "BALANCED",
+                    price: "₹234.70",
+                    change: "+0.85%",
+                    isPositive: true,
+                    reason: "60% equity, 40% debt allocation. Balances growth potential with risk management."
+                },
+                {
+                    name: "Index Fund",
+                    symbol: "NIFTY50",
+                    price: "₹18,247.60",
+                    change: "+1.24%",
+                    isPositive: true,
+                    reason: "Tracks market performance with low fees. Diversified exposure to top 50 Indian companies."
+                },
+                {
+                    name: "Large & Mid Cap",
+                    symbol: "LARGEMID",
+                    price: "₹445.90",
+                    change: "+1.15%",
+                    isPositive: true,
+                    reason: "Combination of stability and growth. 50% large-cap, 50% mid-cap allocation."
+                },
+                {
+                    name: "Dividend Yield",
+                    symbol: "DIVYIELD",
+                    price: "₹89.45",
+                    change: "+0.95%",
+                    isPositive: true,
+                    reason: "Focus on companies with consistent dividend payouts. Regular income with moderate growth."
+                },
+                {
+                    name: "Sector Rotation",
+                    symbol: "SECTOR",
+                    price: "₹567.30",
+                    change: "+1.42%",
+                    isPositive: true,
+                    reason: "Dynamic allocation across sectors. Capitalizes on economic cycles and sector performance."
+                },
+                {
+                    name: "Hybrid Bond",
+                    symbol: "HYBRID",
+                    price: "₹1,123.80",
+                    change: "+0.67%",
+                    isPositive: true,
+                    reason: "Mix of corporate and government bonds. Higher returns than pure government bonds with controlled risk."
+                }
+            ],
+            high: [
+                {
+                    name: "Small Cap Fund",
+                    symbol: "SMALLCAP",
+                    price: "₹89.45",
+                    change: "+3.24%",
+                    isPositive: true,
+                    reason: "High growth potential from emerging companies. Higher volatility but significant upside potential."
+                },
+                {
+                    name: "Technology Fund",
+                    symbol: "TECH",
+                    price: "₹234.80",
+                    change: "+2.87%",
+                    isPositive: true,
+                    reason: "Exposure to innovation and digital transformation. High growth sector with global opportunities."
+                },
+                {
+                    name: "Emerging Markets",
+                    symbol: "EMERGE",
+                    price: "₹1,567.90",
+                    change: "+4.12%",
+                    isPositive: true,
+                    reason: "Access to high-growth economies. Diversification beyond domestic markets with higher return potential."
+                },
+                {
+                    name: "Leveraged ETF",
+                    symbol: "LEVERAGE",
+                    price: "₹445.60",
+                    change: "+5.23%",
+                    isPositive: true,
+                    reason: "2x exposure to market movements. Amplified returns suitable for experienced investors."
+                },
+                {
+                    name: "Cryptocurrency",
+                    symbol: "CRYPTO",
+                    price: "₹68,47,250",
+                    change: "+6.45%",
+                    isPositive: true,
+                    reason: "Digital asset exposure with high volatility. Revolutionary technology with asymmetric return potential."
+                },
+                {
+                    name: "Venture Capital",
+                    symbol: "VENTURE",
+                    price: "₹1,234.70",
+                    change: "+7.89%",
+                    isPositive: true,
+                    reason: "Early-stage company investments. Access to disruptive innovations with exponential growth potential."
+                }
+            ]
+        };
+
+        // Initialize the chat
+        window.onload = function() {
+            initializeChat();
+            setupEventListeners();
+            // Show personalized greeting if user is logged in
+            showUserGreeting();
+            
+            // Log page visit to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'AI Investment Chat',
+                        action: 'Page Visit',
+                        description: 'User visited AI Investment Chat page',
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ AI Chat page visit logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging page visit to admin database:', error);
+                }
+            }
+        };
+
+        function initializeChat() {
+            // Simulate typing animation for initial message
+            setTimeout(() => {
+                document.getElementById('typingIndicator').style.display = 'none';
+                document.getElementById('messageText').style.display = 'block';
+                scrollToBottom();
+            }, 2000);
+
+            // Personalized initial message
+            const userName = authManager.isLoggedIn() ? (authManager.getCurrentUser().name || 'User') : 'there';
+            const personalizedGreeting = authManager.isLoggedIn() ? `Hello ${userName}! ` : "Hello! ";
+            
+            // Add initial message to conversation
+            conversation.push({
+                type: 'ai',
+                message: personalizedGreeting + "I'm FinView's AI Investment Assistant. I can help you with investment advice, market analysis, and portfolio recommendations. Try selecting your risk tolerance on the right, or ask me anything about investments!"
+            });
+        }
+
+        function setupEventListeners() {
+            const userMessage = document.getElementById('userMessage');
+            const sendBtn = document.getElementById('sendBtn');
+
+            // Handle Enter key (send message)
+            userMessage.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        function sendMessage() {
+            const userMessage = document.getElementById('userMessage');
+            const message = userMessage.value.trim();
+
+            if (message === '' || isTyping) return;
+
+            // Add user message to conversation
+            conversation.push({ type: 'user', message: message });
+            displayMessage('user', message);
+
+            // Log user message to admin database if user is logged in
+            if (isLoggedIn && currentUser) {
+                try {
+                    finViewAdminDB.addChatbotConversation(currentUser.userId, {
+                        message: message,
+                        response: '', // Will be updated when we get AI response
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ User message logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging user message to admin database:', error);
+                }
+            }
+
+            // Clear input
+            userMessage.value = '';
+
+            // Show typing indicator
+            displayTypingIndicator();
+            isTyping = true;
+
+            // Get user ID from localStorage (null if not logged in)
+            const isLoggedIn = authManager.isLoggedIn();
+            const currentUser = isLoggedIn ? authManager.getCurrentUser() : null;
+            const userId = currentUser ? currentUser.userId : null;
+
+            // Call backend API
+            fetch('http://localhost:3000/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    userId: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Add AI response to conversation
+                conversation.push({ type: 'ai', message: data.reply });
+                displayMessage('ai', data.reply);
+                isTyping = false;
+
+                // Log complete conversation to admin database if user is logged in
+                if (isLoggedIn && currentUser) {
+                    try {
+                        finViewAdminDB.addChatbotConversation(currentUser.userId, {
+                            message: message,
+                            response: data.reply,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            url: window.location.href,
+                            trainingSystemUsed: false // API response, not training system
+                        });
+                        console.log('✅ Complete conversation logged to Admin Database');
+                    } catch (error) {
+                        console.error('Error logging conversation to admin database:', error);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Chat API Error:', error);
+                // Fallback to local AI response if API fails
+                const fallbackResponse = generateAIResponse(message);
+                conversation.push({ type: 'ai', message: fallbackResponse });
+                displayMessage('ai', fallbackResponse);
+                isTyping = false;
+
+                // Log fallback conversation to admin database if user is logged in
+                if (isLoggedIn && currentUser) {
+                    try {
+                        finViewAdminDB.addChatbotConversation(currentUser.userId, {
+                            message: message,
+                            response: fallbackResponse,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            url: window.location.href,
+                            isFallback: true,
+                            trainingSystemUsed: true // Training system was used for fallback response
+                        });
+                        console.log('✅ Fallback conversation logged to Admin Database');
+                    } catch (error) {
+                        console.error('Error logging fallback conversation to admin database:', error);
+                    }
+                }
+            });
+        }
+
+        function displayTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai';
+            typingDiv.id = 'typingMessage';
+            
+            typingDiv.innerHTML = `
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function displayMessage(type, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Remove typing indicator if it exists
+            const typingMessage = document.getElementById('typingMessage');
+            if (typingMessage) {
+                typingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = type === 'ai' ? 
+                '<div class="message-avatar"><i class="fas fa-robot"></i></div>' : 
+                '<div class="message-avatar"><i class="fas fa-user"></i></div>';
+
+            messageDiv.innerHTML = `
+                ${avatar}
+                <div class="message-content">
+                    ${formatMessage(message)}
+                </div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function formatMessage(message) {
+            // Basic formatting for better readability
+            return message
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        function generateAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Get user name for personalized responses
+            const userName = authManager.isLoggedIn() ? (authManager.getCurrentUser().name || 'User') : 'there';
+            const personalizedGreeting = authManager.isLoggedIn() ? `${userName}, ` : '';
+            
+            // Get user's financial data for personalized responses
+            let userFinancialData = null;
+            let riskLevel = currentRisk || 'medium'; // Use current risk level or default to medium
+            
+            if (authManager.isLoggedIn()) {
+                try {
+                    const currentUser = authManager.getCurrentUser();
+                    userFinancialData = {
+                        transactions: finViewAdminDB.getTransactions(currentUser.userId),
+                        investments: finViewAdminDB.getInvestments(currentUser.userId),
+                        budgets: finViewAdminDB.getBudgets(currentUser.userId),
+                        totalIncome: finViewAdminDB.getTotalIncome(currentUser.userId),
+                        totalExpenses: finViewAdminDB.getTotalExpenses(currentUser.userId),
+                        netWorth: finViewAdminDB.getNetWorth(currentUser.userId)
+                    };
+                } catch (error) {
+                    console.error('Error getting user financial data:', error);
+                }
+            }
+            
+            // Investment-related responses with personalized data
+            if (message.includes('investment') || message.includes('invest')) {
+                if (userFinancialData && userFinancialData.investments.length > 0) {
+                    const totalInvestments = userFinancialData.investments.reduce((sum, inv) => sum + inv.currentValue, 0);
+                    return `${personalizedGreeting}I can see you currently have ₹${totalInvestments.toLocaleString()} in investments. Based on your portfolio, I can provide personalized recommendations. What's your risk tolerance level? You can select Low, Medium, or High risk on the right panel for tailored advice.`;
+                }
+                return `${personalizedGreeting}I'd be happy to help with investment advice! What's your risk tolerance level? You can select Low, Medium, or High risk on the right panel, and I'll provide personalized recommendations. You can also ask me about specific sectors, market trends, or portfolio allocation.`;
+            }
+            
+            if (message.includes('portfolio') || message.includes('allocation')) {
+                if (userFinancialData) {
+                    const totalIncome = userFinancialData.totalIncome || 0;
+                    const totalExpenses = userFinancialData.totalExpenses || 0;
+                    const monthlySavings = totalIncome - totalExpenses;
+                    const netWorth = userFinancialData.netWorth || 0;
+                    
+                    return `${personalizedGreeting}based on your financial data, you have a monthly savings of ₹${monthlySavings.toLocaleString()} and a net worth of ₹${netWorth.toLocaleString()}. A good rule is to invest 20-30% of your income. With your current savings, you could allocate ₹${Math.round(monthlySavings * 0.7).toLocaleString()} monthly to investments. Would you like specific portfolio suggestions based on your risk tolerance?`;
+                }
+                return `${personalizedGreeting}portfolio allocation depends on your risk tolerance and investment timeline. A common rule is the '100 minus age' rule for equity allocation. For example, if you're 30, consider 70% in equities. Would you like me to suggest specific allocations based on your risk tolerance? Select your risk level on the right!`;
+            }
+            
+            if (message.includes('budget') || message.includes('expense')) {
+                if (userFinancialData && userFinancialData.totalExpenses > 0) {
+                    const totalIncome = userFinancialData.totalIncome || 0;
+                    const totalExpenses = userFinancialData.totalExpenses;
+                    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
+                    
+                    let budgetAnalysis = `${personalizedGreeting}here's your budget analysis:\n\n`;
+                    budgetAnalysis += `💰 **Current Status:** ₹${totalExpenses.toLocaleString()} expenses vs ₹${totalIncome.toLocaleString()} income\n`;
+                    budgetAnalysis += `📊 **Savings Rate:** ${savingsRate}%\n\n`;
+                    
+                    if (savingsRate < 20) {
+                        budgetAnalysis += `⚠️ Your savings rate is below the recommended 20-30%. Here are optimization tips:\n`;
+                        budgetAnalysis += `• Track discretionary spending (dining out, entertainment)\n`;
+                        budgetAnalysis += `• Consider reducing non-essential subscriptions\n`;
+                        budgetAnalysis += `• Set up automatic transfers to investment accounts first\n`;
+                        budgetAnalysis += `• Review and negotiate recurring bills (insurance, utilities)`;
+                    } else if (savingsRate > 30) {
+                        budgetAnalysis += `🎉 Excellent savings rate! You're saving more than average. Consider:\n`;
+                        budgetAnalysis += `• Maximize tax-advantaged investments (PPF, ELSS)\n`;
+                        budgetAnalysis += `• Diversify into different asset classes\n`;
+                        budgetAnalysis += `• Consider increasing investment allocation`;
+                    } else {
+                        budgetAnalysis += `✅ Good savings rate! You're within the recommended range. Focus on:\n`;
+                        budgetAnalysis += `• Consistent investment strategy\n`;
+                        budgetAnalysis += `• Emergency fund of 6-12 months expenses\n`;
+                        budgetAnalysis += `• Regular portfolio rebalancing`;
+                    }
+                    
+                    return budgetAnalysis;
+                }
+                return `${personalizedGreeting}budget tracking is essential for successful investing! I recommend the 50-30-20 rule: 50% needs, 30% wants, 20% savings/investments. Would you like to start tracking your expenses to optimize your investment potential?`;
+            }
+            
+            if (message.includes('savings') || message.includes('save')) {
+                if (userFinancialData) {
+                    const totalIncome = userFinancialData.totalIncome || 0;
+                    const totalExpenses = userFinancialData.totalExpenses || 0;
+                    const monthlySavings = totalIncome - totalExpenses;
+                    
+                    return `${personalizedGreeting}based on your current financial data, you're saving ₹${monthlySavings.toLocaleString()} monthly. To maximize your investment potential, consider setting up automatic transfers to investment accounts. Even small amounts like ₹1,000 monthly can grow to ₹10+ lakhs in 15 years at 12% return!`;
+                }
+                return `${personalizedGreeting}consistent savings are the foundation of successful investing! Start with whatever you can afford - even ₹500 monthly matters. The key is consistency and starting early. Would you like help setting up an investment plan based on your savings capacity?`;
+            }
+            
+            // Existing responses for other topics
+            if (message.includes('market') || message.includes('trend')) {
+                if (userFinancialData && userFinancialData.transactions && userFinancialData.transactions.length > 0) {
+                    // Analyze spending trends
+                    const last30Days = new Date();
+                    last30Days.setDate(last30Days.getDate() - 30);
+                    
+                    const recentTransactions = userFinancialData.transactions.filter(t => new Date(t.date) >= last30Days);
+                    const spendingByCategory = {};
+                    let totalSpending = 0;
+                    
+                    recentTransactions.forEach(t => {
+                        if (t.type === 'expense') {
+                            const category = t.category || 'Other';
+                            spendingByCategory[category] = (spendingByCategory[category] || 0) + t.amount;
+                            totalSpending += t.amount;
+                        }
+                    });
+                    
+                    // Find top spending categories
+                    const sortedCategories = Object.entries(spendingByCategory)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 3);
+                    
+                    let trendAnalysis = `${personalizedGreeting}here are your financial trends:\n\n`;
+                    trendAnalysis += `📅 **Last 30 Days Analysis:**\n`;
+                    trendAnalysis += `• Total Expenses: ₹${totalSpending.toLocaleString()}\n`;
+                    trendAnalysis += `• Average Daily: ₹${(totalSpending / 30).toFixed(0).toLocaleString()}\n\n`;
+                    
+                    if (sortedCategories.length > 0) {
+                        trendAnalysis += `💸 **Top Spending Categories:**\n`;
+                        sortedCategories.forEach(([category, amount], index) => {
+                            const percentage = ((amount / totalSpending) * 100).toFixed(1);
+                            trendAnalysis += `${index + 1}. ${category}: ₹${amount.toLocaleString()} (${percentage}%)\n`;
+                        });
+                        trendAnalysis += `\n`;
+                    }
+                    
+                    // Compare with budget if available
+                    if (userFinancialData.budgets && userFinancialData.budgets.length > 0) {
+                        const totalBudget = userFinancialData.budgets.reduce((sum, budget) => sum + budget.amount, 0);
+                        const budgetUtilization = ((totalSpending / totalBudget) * 100).toFixed(1);
+                        
+                        trendAnalysis += `📊 **Budget Status:** ${budgetUtilization}% of monthly budget used\n`;
+                        if (budgetUtilization > 90) {
+                            trendAnalysis += `⚠️ You're approaching your budget limit! Consider reviewing discretionary spending.\n`;
+                        } else if (budgetUtilization < 70) {
+                            trendAnalysis += `✅ Great! You're under budget. Consider increasing savings or investments.\n`;
+                        } else {
+                            trendAnalysis += `✅ On track with your budget planning.\n`;
+                        }
+                    }
+                    
+                    // Investment trends if available
+                    if (userFinancialData.investments.length > 0) {
+                        const totalInvestments = userFinancialData.investments.reduce((sum, inv) => sum + inv.currentValue, 0);
+                        const totalInvested = userFinancialData.investments.reduce((sum, inv) => sum + inv.amountInvested, 0);
+                        const overallReturn = totalInvested > 0 ? (((totalInvestments - totalInvested) / totalInvested) * 100).toFixed(1) : 0;
+                        
+                        trendAnalysis += `\n📈 **Investment Performance:** ${overallReturn}% overall return\n`;
+                        if (overallReturn > 10) {
+                            trendAnalysis += `🚀 Strong investment performance! Consider maintaining current strategy.\n`;
+                        } else if (overallReturn < 0) {
+                            trendAnalysis += `📉 Review your investment strategy - consider diversification or professional advice.\n`;
+                        }
+                    }
+                    
+                    return trendAnalysis;
+                }
+                return `${personalizedGreeting}the current market shows mixed signals. NIFTY 50 is up 1.2% today, with strong performance in IT and Pharma sectors. However, there's volatility in banking stocks due to recent policy changes. Would you like specific sector analysis or should I recommend investments based on your risk profile?`;
+            }
+            
+            if (message.includes('stock') || message.includes('share')) {
+                return `${personalizedGreeting}I can help you analyze stocks! For detailed analysis, you might want to check our Investment Analytics dashboard. For now, I can recommend stocks based on your risk tolerance. Try selecting your risk level on the right panel, and I'll show you suitable stock recommendations.`;
+            }
+            
+            if (message.includes('crypto') || message.includes('bitcoin')) {
+                return `${personalizedGreeting}cryptocurrency is a high-risk, high-reward investment. Bitcoin is currently trading around ₹68,47,250, up 6.45% today. However, crypto is extremely volatile and should only be a small part of a diversified portfolio. For high-risk investors, I recommend a maximum 5-10% allocation.`;
+            }
+            
+            if (message.includes('mutual fund') || message.includes('mf')) {
+                return `${personalizedGreeting}mutual funds are excellent for diversification! For beginners, I recommend starting with index funds or balanced funds. They offer professional management and instant diversification. Select your risk tolerance on the right, and I'll show you specific mutual fund recommendations tailored to your profile.`;
+            }
+            
+            if (message.includes('sip') || message.includes('systematic')) {
+                return `${personalizedGreeting}SIP (Systematic Investment Plan) is a great strategy! It helps with rupee-cost averaging and removes the need to time the market. Even ₹500/month can grow significantly over time. For example, ₹5,000 monthly SIP at 12% return could grow to ₹50+ lakhs in 20 years!`;
+            }
+            
+            if (message.includes('tax') || message.includes('elss')) {
+                return `${personalizedGreeting}ELSS (Equity Linked Savings Scheme) offers tax benefits under Section 80C with potential for higher returns than traditional tax-saving instruments. They have a 3-year lock-in period. Would you like me to suggest some ELSS funds based on your risk profile?`;
+            }
+            
+            if (message.includes('gold') || message.includes('precious')) {
+                return `${personalizedGreeting}gold is traditionally a hedge against inflation and market volatility. Consider allocating 5-10% of your portfolio to gold through Gold ETFs or sovereign gold bonds. It provides stability during market downturns and currency devaluation periods.`;
+            }
+            
+            if (message.includes('performance') || message.includes('return') || message.includes('gain')) {
+                if (userFinancialData && userFinancialData.investments.length > 0) {
+                    const performanceData = userFinancialData.investments.map(inv => {
+                        const gainLoss = inv.currentValue - inv.amountInvested;
+                        const returnPercent = inv.amountInvested > 0 ? ((gainLoss / inv.amountInvested) * 100).toFixed(1) : 0;
+                        return {
+                            name: inv.name,
+                            gainLoss: gainLoss,
+                            returnPercent: returnPercent,
+                            currentValue: inv.currentValue,
+                            amountInvested: inv.amountInvested,
+                            category: inv.category || 'Other'
+                        };
+                    });
+                    
+                    const topPerformer = performanceData.reduce((a, b) => parseFloat(a.returnPercent) > parseFloat(b.returnPercent) ? a : b);
+                    const worstPerformer = performanceData.reduce((a, b) => parseFloat(a.returnPercent) < parseFloat(b.returnPercent) ? a : b);
+                    const totalCurrentValue = performanceData.reduce((sum, inv) => sum + inv.currentValue, 0);
+                    const totalInvested = userFinancialData.investments.reduce((sum, inv) => sum + inv.amountInvested, 0);
+                    const totalGainLoss = totalCurrentValue - totalInvested;
+                    const totalReturnPercent = totalInvested > 0 ? ((totalGainLoss / totalInvested) * 100).toFixed(1) : 0;
+                    
+                    // Calculate category allocation
+                    const categoryAllocation = {};
+                    performanceData.forEach(inv => {
+                        if (!categoryAllocation[inv.category]) {
+                            categoryAllocation[inv.category] = 0;
+                        }
+                        categoryAllocation[inv.category] += inv.currentValue;
+                    });
+                    
+                    let performanceSummary = `${personalizedGreeting}here's your investment performance summary:\n\n`;
+                    performanceSummary += `📊 **Overall Portfolio:** ₹${totalCurrentValue.toLocaleString()} (₹${totalGainLoss.toLocaleString()} ${totalGainLoss >= 0 ? 'gain' : 'loss'}, ${totalReturnPercent}%)\n\n`;
+                    performanceSummary += `🏆 **Top Performer:** ${topPerformer.name} (${topPerformer.returnPercent}%)\n`;
+                    performanceSummary += `📉 **Needs Attention:** ${worstPerformer.name} (${worstPerformer.returnPercent}%)\n\n`;
+                    
+                    // Add category allocation insights
+                    performanceSummary += `📈 **Asset Allocation:**\n`;
+                    Object.entries(categoryAllocation).forEach(([category, value]) => {
+                        const percentage = ((value / totalCurrentValue) * 100).toFixed(1);
+                        performanceSummary += `• ${category}: ${percentage}% (₹${value.toLocaleString()})\n`;
+                    });
+                    
+                    if (totalReturnPercent > 10) {
+                        performanceSummary += `\n🎉 Excellent performance! Your portfolio is outperforming the market. Consider rebalancing to lock in gains and maintain your target allocation.`;
+                    } else if (totalReturnPercent > 0) {
+                        performanceSummary += `\n✅ Good steady performance! Your portfolio is growing. Consider reviewing underperforming assets for potential reallocation.`;
+                    } else {
+                        performanceSummary += `\n⚠️ Your portfolio needs attention. Consider diversifying or switching to more stable investments. Would you like specific rebalancing suggestions?`;
+                    }
+                    
+                    return performanceSummary;
+                }
+                return `${personalizedGreeting}to view your investment performance, you'll need to add investments to your portfolio first. Once you have investments, I can analyze your returns, identify top performers, and suggest rebalancing strategies. Would you like help getting started?`;
+            }
+            
+            if (message.includes('rebalance') || message.includes('diversify')) {
+                if (userFinancialData && userFinancialData.investments.length > 0) {
+                    const totalCurrentValue = userFinancialData.investments.reduce((sum, inv) => sum + inv.currentValue, 0);
+                    const categoryAllocation = {};
+                    
+                    userFinancialData.investments.forEach(inv => {
+                        const category = inv.category || 'Other';
+                        if (!categoryAllocation[category]) {
+                            categoryAllocation[category] = { value: 0, count: 0, totalReturn: 0 };
+                        }
+                        categoryAllocation[category].value += inv.currentValue;
+                        categoryAllocation[category].count += 1;
+                        const returnPercent = inv.amountInvested > 0 ? ((inv.currentValue - inv.amountInvested) / inv.amountInvested * 100) : 0;
+                        categoryAllocation[category].totalReturn += returnPercent;
+                    });
+                    
+                    // Calculate average returns per category
+                    Object.keys(categoryAllocation).forEach(category => {
+                        categoryAllocation[category].avgReturn = categoryAllocation[category].totalReturn / categoryAllocation[category].count;
+                        categoryAllocation[category].percentage = (categoryAllocation[category].value / totalCurrentValue * 100).toFixed(1);
+                    });
+                    
+                    let rebalanceAdvice = `${personalizedGreeting}here are my rebalancing recommendations:\n\n`;
+                    
+                    // Ideal allocation based on risk tolerance
+                    let idealAllocation = {};
+                    if (currentRisk === 'low') {
+                        idealAllocation = { 'Equity': 30, 'Debt': 50, 'Gold': 10, 'Other': 10 };
+                    } else if (currentRisk === 'medium') {
+                        idealAllocation = { 'Equity': 50, 'Debt': 30, 'Gold': 10, 'Other': 10 };
+                    } else if (currentRisk === 'high') {
+                        idealAllocation = { 'Equity': 70, 'Debt': 15, 'Gold': 5, 'Other': 10 };
+                    } else {
+                        idealAllocation = { 'Equity': 40, 'Debt': 40, 'Gold': 10, 'Other': 10 };
+                    }
+                    
+                    rebalanceAdvice += `🎯 **Ideal Allocation for ${currentRisk || 'medium'} risk:**\n`;
+                    Object.entries(idealAllocation).forEach(([category, percentage]) => {
+                        const current = categoryAllocation[category] || { percentage: 0 };
+                        const difference = (percentage - current.percentage).toFixed(1);
+                        const action = difference > 0 ? `+${difference}% (Buy)` : `${difference}% (Sell)`;
+                        rebalanceAdvice += `• ${category}: ${percentage}% (Current: ${current.percentage}%) ${difference != 0 ? action : '✅ Balanced'}\n`;
+                    });
+                    
+                    rebalanceAdvice += `\n💡 **Rebalancing Strategy:**\n`;
+                    rebalanceAdvice += `• Review and rebalance every 6 months\n`;
+                    rebalanceAdvice += `• Sell overweight categories, buy underweight ones\n`;
+                    rebalanceAdvice += `• Consider tax implications when selling\n`;
+                    rebalanceAdvice += `• Use new investments to balance instead of selling when possible`;
+                    
+                    return rebalanceAdvice;
+                }
+                return `${personalizedGreeting}to provide rebalancing suggestions, I'll need to see your current portfolio first. Once you have investments, I can analyze your asset allocation and suggest optimal rebalancing based on your risk tolerance. Would you like to add some investments first?`;
+            }
+            
+            if (message.includes('retirement') || message.includes('pension')) {
+                if (userFinancialData && userFinancialData.netWorth > 0) {
+                    const currentNetWorth = userFinancialData.netWorth;
+                    const retirementTarget = currentNetWorth * 25; // 4% withdrawal rule
+                    
+                    return `${personalizedGreeting}retirement planning is crucial! Your current net worth is ₹${currentNetWorth.toLocaleString()}. For comfortable retirement, you might want to target ₹${retirementTarget.toLocaleString()}. Based on your current financial position, I can suggest a personalized retirement investment strategy. Would you like specific recommendations?`;
+                }
+                return `${personalizedGreeting}retirement planning is crucial! Start early to benefit from compound interest. Consider a mix of EPF, PPF, NPS, and mutual funds. A 25-year-old investing ₹10,000 monthly could accumulate ₹5+ crores by age 60 at 12% return. Would you like personalized retirement investment suggestions?`;
+            }
+            
+            // Default responses - enhanced with past conversation context
+            let defaultResponses = [];
+            
+            // Analyze past conversations for context-aware responses
+            if (pastConversations.length > 0) {
+                const recentTopics = [];
+                const conversationHistory = pastConversations.slice(-10); // Last 10 conversations
+                
+                conversationHistory.forEach(conv => {
+                    const userMessage = conv.userMessage.toLowerCase();
+                    if (userMessage.includes('investment') || userMessage.includes('invest')) recentTopics.push('investment');
+                    if (userMessage.includes('budget') || userMessage.includes('expense')) recentTopics.push('budget');
+                    if (userMessage.includes('savings') || userMessage.includes('save')) recentTopics.push('savings');
+                    if (userMessage.includes('retirement') || userMessage.includes('pension')) recentTopics.push('retirement');
+                    if (userMessage.includes('performance') || userMessage.includes('return')) recentTopics.push('performance');
+                    if (userMessage.includes('rebalance') || userMessage.includes('diversify')) recentTopics.push('rebalancing');
+                });
+                
+                // Find most common topics
+                const topicCounts = {};
+                recentTopics.forEach(topic => {
+                    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+                });
+                
+                const topTopics = Object.entries(topicCounts)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 2)
+                    .map(([topic]) => topic);
+                
+                // Generate context-aware responses
+                if (topTopics.length > 0) {
+                    defaultResponses.push(`${personalizedGreeting}I notice you've been asking about ${topTopics.join(' and ')} recently. Based on our previous conversations, would you like me to dive deeper into those topics or explore something new?`);
+                    defaultResponses.push(`${personalizedGreeting}building on our previous discussions about ${topTopics[0]}, would you like specific recommendations tailored to your current financial situation?`);
+                }
+                
+                // Add personalized follow-up suggestions based on financial data
+                if (userFinancialData) {
+                    const suggestions = [];
+                    
+                    if (userFinancialData.investments.length === 0) {
+                        suggestions.push('start building your investment portfolio');
+                    }
+                    if (userFinancialData.totalExpenses > userFinancialData.totalIncome * 0.9) {
+                        suggestions.push('optimize your budget for better savings');
+                    }
+                    if (userFinancialData.netWorth < userFinancialData.totalIncome * 6) {
+                        suggestions.push('build your emergency fund');
+                    }
+                    if (userFinancialData.investments.length > 0) {
+                        suggestions.push('review your portfolio performance');
+                    }
+                    
+                    if (suggestions.length > 0) {
+                        defaultResponses.push(`${personalizedGreeting}based on your financial profile, you might want to consider ${suggestions.join(' or ')}. Would you like specific guidance on any of these areas?`);
+                    }
+                }
+            }
+            
+            // Standard default responses
+            defaultResponses.push(`${personalizedGreeting}that's an interesting question! Let me help you with that. Could you tell me more about your investment goals, timeline, or risk tolerance? You can also select your risk level on the right panel for personalized recommendations.`);
+            defaultResponses.push(`${personalizedGreeting}I'd love to help you with investment advice! What specific aspect would you like to know more about - stocks, mutual funds, portfolio allocation, or market trends?`);
+            defaultResponses.push(`${personalizedGreeting}great question! For the most relevant advice, consider selecting your risk tolerance level on the right panel. This will help me provide personalized investment recommendations.`);
+            defaultResponses.push(`${personalizedGreeting}I'm here to help with all your investment questions! Whether it's about market analysis, portfolio building, or specific investment options, feel free to ask anything.`);
+            
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+
+        function selectRisk(riskLevel) {
+            currentRisk = riskLevel;
+            
+            // Update button states
+            document.querySelectorAll('.risk-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-risk="${riskLevel}"]`).classList.add('active');
+            
+            // Update suggestions
+            updateSuggestions(riskLevel);
+            
+            // Log risk tolerance selection to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'AI Investment Chat',
+                        action: 'Select Risk Tolerance',
+                        description: `Selected ${riskLevel} risk tolerance`,
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ Risk tolerance selection logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging risk tolerance selection to admin database:', error);
+                }
+            }
+            
+            // Add AI response about risk selection
+            const userName = authManager.isLoggedIn() ? (authManager.getCurrentUser().name || 'User') : 'there';
+            const riskMessages = {
+                low: `Excellent choice, ${userName}! Low-risk investments focus on capital preservation and steady returns. I've selected conservative options like government bonds, blue-chip funds, and fixed deposits that prioritize stability over high returns.`,
+                medium: `Great choice, ${userName}! Medium-risk investments offer a balanced approach. I've recommended options like balanced funds, index funds, and dividend-yield stocks that provide moderate growth with controlled risk.`,
+                high: `Adventurous choice, ${userName}! High-risk investments can offer significant returns. I've suggested options like small-cap funds, technology stocks, and emerging market exposure for maximum growth potential.`
+            };
+            
+            conversation.push({ type: 'ai', message: riskMessages[riskLevel] });
+            displayMessage('ai', riskMessages[riskLevel]);
+        }
+
+        function updateSuggestions(riskLevel) {
+            const suggestionsList = document.getElementById('suggestionsList');
+            const investments = investmentData[riskLevel] || [];
+            
+            suggestionsList.innerHTML = '';
+            
+            investments.forEach((investment, index) => {
+                setTimeout(() => {
+                    const card = document.createElement('div');
+                    card.className = 'suggestion-card fade-in';
+                    card.innerHTML = `
+                        <div class="suggestion-header">
+                            <div class="suggestion-name">${investment.name}</div>
+                            <div class="suggestion-symbol">${investment.symbol}</div>
+                        </div>
+                        <div class="suggestion-price">${investment.price}</div>
+                        <div class="suggestion-change ${investment.isPositive ? 'positive' : 'negative'}">
+                            ${investment.change}
+                        </div>
+                        <div class="suggestion-reason">
+                            ${investment.reason}
+                        </div>
+                    `;
+                    
+                    card.onclick = () => {
+                        const message = `Tell me more about ${investment.name} (${investment.symbol}). What are the key factors to consider?`;
+                        conversation.push({ type: 'user', message: message });
+                        displayMessage('user', message);
+                        
+                        setTimeout(() => {
+                            const userName = authManager.isLoggedIn() ? (authManager.getCurrentUser().name || 'User') : 'there';
+                            const detailResponse = `Great choice, ${userName}! ${investment.name} ${investment.reason} Current price is ${investment.price} with ${investment.change} change. This fits your ${riskLevel} risk profile perfectly. Would you like to know about entry timing or portfolio allocation for this investment?`;
+                            conversation.push({ type: 'ai', message: detailResponse });
+                            displayMessage('ai', detailResponse);
+                        }, 1000);
+                    };
+                    
+                    suggestionsList.appendChild(card);
+                }, index * 200);
+            });
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Personalized greeting function
+        function showUserGreeting() {
+            const chatHeader = document.querySelector('.chat-header');
+            const chatTitle = document.querySelector('.chat-title');
+            
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                const userName = currentUser.name || 'User';
+                
+                // Update chat title to include personalized greeting
+                chatTitle.innerHTML = `Welcome, <span style="color: var(--neon-mint);">${userName}</span>! 👋`;
+                chatHeader.style.background = 'linear-gradient(135deg, var(--bg-glass) 0%, rgba(0, 227, 140, 0.1) 100%)';
+                
+                // Add personalized subtitle
+                const existingSubtitle = document.querySelector('.chat-subtitle');
+                if (existingSubtitle) {
+                    existingSubtitle.textContent = `I'm here to help you with personalized investment advice, ${userName.split(' ')[0]}!`;
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileToggle = document.querySelector('.mobile-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !mobileToggle.contains(e.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+    <script src="auth.js"></script>
+    <script src="finview-admin-db.js"></script>
+</body>
+</html>

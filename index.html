@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinView - Your Money. Your Data. Your Power.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --mint-neon: #00E38C;
+            --dark-bg: #1B1B1D;
+            --dark-secondary: #2A2A2C;
+            --text-light: #FFFFFF;
+            --text-muted: #B0B0B0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glow-shadow: 0 0 20px rgba(0, 227, 140, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Styles */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+
+        .glass-hover {
+            transition: all 0.3s ease;
+        }
+
+        .glass-hover:hover {
+            background: rgba(0, 227, 140, 0.1);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-5px);
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(27, 27, 29, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--mint-neon) !important;
+            text-shadow: 0 0 10px rgba(0, 227, 140, 0.5);
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--mint-neon) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--mint-neon);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: var(--mint-neon);
+            font-size: 1.5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2A2A2C 50%, var(--dark-bg) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 227, 140, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding-top: 120px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--text-light), var(--mint-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .btn-mint {
+            background: var(--mint-neon);
+            color: var(--dark-bg);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-mint:hover {
+            background: var(--mint-neon);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-2px);
+            color: var(--dark-bg);
+        }
+
+        .btn-outline-mint {
+            background: transparent;
+            color: var(--mint-neon);
+            border: 2px solid var(--mint-neon);
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-outline-mint:hover {
+            background: var(--mint-neon);
+            color: var(--dark-bg);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-2px);
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            background: rgba(0, 227, 140, 0.1);
+            box-shadow: var(--glow-shadow);
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--mint-neon);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(0, 227, 140, 0.5);
+        }
+
+        .feature-card h3 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Market Snapshot */
+        .market-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .market-card:hover {
+            box-shadow: var(--glow-shadow);
+        }
+
+        .market-title {
+            font-weight: 600;
+            color: var(--mint-neon);
+            margin-bottom: 0.5rem;
+        }
+
+        .market-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .market-change {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .positive {
+            color: var(--mint-neon);
+        }
+
+        .negative {
+            color: #ff4757;
+        }
+
+        /* Why FinView Section */
+        .why-item {
+            text-align: center;
+            padding: 2rem 1rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .why-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .why-icon {
+            font-size: 3.5rem;
+            color: var(--mint-neon);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 30px rgba(0, 227, 140, 0.5);
+        }
+
+        /* Testimonials */
+        .testimonial-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 0 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            box-shadow: var(--glow-shadow);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--mint-neon);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--dark-secondary), var(--dark-bg));
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 227, 140, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-content .btn {
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-bg);
+            border-top: 1px solid var(--glass-border);
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .social-icons a {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--mint-neon);
+            text-shadow: 0 0 10px rgba(0, 227, 140, 0.5);
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 60px;
+            margin-top: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .feature-card {
+                margin-bottom: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .nav-link {
+                margin: 0.5rem 0;
+            }
+            
+            .cta-content {
+                padding: 0 1rem;
+            }
+            
+            .cta-content .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Scroll Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-padding {
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, var(--text-light), var(--mint-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">FinView</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget-tracker.html">Budget Tracker</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="investment-analytics.html">Investments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ai-investment-chat.html">AI Advisor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="user-profile-dashboard.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="fade-in">Your Money. Your Data. Your Power.</h1>
+                    <p class="fade-in">Take control of your financial future with intelligent insights, real-time analytics, and AI-powered recommendations. FinView brings clarity to complexity.</p>
+                    <div class="fade-in">
+                        <button class="btn btn-mint" id="startTrackingBtn">Start Tracking</button>
+                        <button class="btn btn-outline-mint" id="viewMarketsBtn">View Markets</button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="glass feature-card fade-in">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line feature-icon"></i>
+                            <h4>Dashboard Preview</h4>
+                            <p>Real-time portfolio tracking with intelligent insights</p>
+                            <div class="chart-container">
+                                <canvas id="heroChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section-padding">
+        <div class="container">
+            <h2 class="section-title fade-in">Powerful Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h3>Budget Tracking</h3>
+                        <p>Smart expense categorization and budget alerts to keep your spending on track. AI-powered insights help you save more.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3>Market Analytics</h3>
+                        <p>Real-time market data with advanced charting tools. Track stocks, crypto, and commodities in one unified dashboard.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI Investing</h3>
+                        <p>AI-powered investment recommendations based on your risk profile and market conditions. Smart portfolio optimization.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Snapshot Section -->
+    <section class="section-padding">
+        <div class="container">
+            <h2 class="section-title fade-in">Market Snapshot</h2>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6 fade-in">
+                    <div class="market-card">
+                        <div class="market-title">BTC/INR</div>
+                        <div class="market-value">₹42,15,890</div>
+                        <div class="market-change positive">+2.45% ↑</div>
+                        <div class="chart-container">
+                            <canvas id="btcChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 fade-in">
+                    <div class="market-card">
+                        <div class="market-title">NIFTY 50</div>
+                        <div class="market-value">21,847.50</div>
+                        <div class="market-change negative">-0.82% ↓</div>
+                        <div class="chart-container">
+                            <canvas id="niftyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 fade-in">
+                    <div class="market-card">
+                        <div class="market-title">GOLD</div>
+                        <div class="market-value">₹62,450</div>
+                        <div class="market-change positive">+1.23% ↑</div>
+                        <div class="chart-container">
+                            <canvas id="goldChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 fade-in">
+                    <div class="market-card">
+                        <div class="market-title">USD-INR</div>
+                        <div class="market-value">₹83.24</div>
+                        <div class="market-change negative">-0.15% ↓</div>
+                        <div class="chart-container">
+                            <canvas id="usdChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why FinView Section -->
+    <section class="section-padding">
+        <div class="container">
+            <h2 class="section-title fade-in">Why Choose FinView</h2>
+            <div class="row g-4">
+                <div class="col-md-4 why-item">
+                    <div class="why-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Bank-Level Security</h4>
+                    <p>256-bit encryption and multi-factor authentication keep your data safe and secure.</p>
+                </div>
+                <div class="col-md-4 why-item">
+                    <div class="why-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>AI-Powered Insights</h4>
+                    <p>Advanced machine learning algorithms provide personalized financial recommendations.</p>
+                </div>
+                <div class="col-md-4 why-item">
+                    <div class="why-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Anytime, Anywhere</h4>
+                    <p>Access your financial dashboard from any device with real-time sync across platforms.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section-padding">
+        <div class="container">
+            <h2 class="section-title fade-in">What Our Users Say</h2>
+            <div class="testimonial-slider fade-in">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "FinView transformed how I manage my finances. The AI insights helped me save 30% more this year!"
+                            </div>
+                            <div class="testimonial-author">- Priya Sharma</div>
+                            <small class="text-muted">Software Engineer</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "The market analytics are incredibly detailed. I make better investment decisions now."
+                            </div>
+                            <div class="testimonial-author">- Rajesh Kumar</div>
+                            <small class="text-muted">Business Owner</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "Budget tracking has never been this easy. The AI categorization is spot on!"
+                            </div>
+                            <div class="testimonial-author">- Anita Desai</div>
+                            <small class="text-muted">Marketing Manager</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="fade-in">Ready to Transform Your Financial Future?</h2>
+                <p class="lead fade-in">Join thousands of users who are already experiencing financial clarity with FinView.</p>
+                <button class="btn btn-mint btn-lg fade-in" id="startJourneyBtn">Start Your Financial Journey</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="social-icons mb-3">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+            <p>&copy; 2024 FinView. All rights reserved. | Privacy Policy | Terms of Service</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // FinView Users Database Class
+        class FinViewUsersDB {
+            constructor() {
+                this.users = this.loadUsers();
+            }
+
+            loadUsers() {
+                const stored = localStorage.getItem('FinViewUsersDB');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            saveUsers() {
+                localStorage.setItem('FinViewUsersDB', JSON.stringify(this.users));
+            }
+
+            addUser(userData) {
+                const existingUser = this.getUserByEmail(userData.email);
+                if (existingUser) {
+                    return null; // User already exists
+                }
+
+                const newUser = {
+                    userId: this.generateUserId(),
+                    ...userData,
+                    createdAt: new Date().toISOString(),
+                    transactions: [],
+                    totalIncome: 0,
+                    totalExpense: 0,
+                    balance: 0
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+
+            getUserByEmail(email) {
+                return this.users.find(user => user.email === email);
+            }
+
+            getUserById(userId) {
+                return this.users.find(user => user.userId === userId);
+            }
+
+            updateUser(userId, updates) {
+                const userIndex = this.users.findIndex(user => user.userId === userId);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = { ...this.users[userIndex], ...updates };
+                    this.saveUsers();
+                    return this.users[userIndex];
+                }
+                return null;
+            }
+
+            validateUser(email, password) {
+                const user = this.getUserByEmail(email);
+                if (user && user.password === password) {
+                    return user;
+                }
+                return null;
+            }
+
+            generateUserId() {
+                return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Google OAuth specific methods
+            addGoogleUser(googleUser) {
+                const existingUser = this.getUserByEmail(googleUser.email);
+                if (existingUser) {
+                    return existingUser; // Return existing user
+                }
+
+                const newUser = {
+                    userId: this.generateUserId(),
+                    name: googleUser.name,
+                    email: googleUser.email,
+                    profileImage: googleUser.picture,
+                    googleId: googleUser.id,
+                    authProvider: 'google',
+                    createdAt: new Date().toISOString(),
+                    transactions: [],
+                    totalIncome: 0,
+                    totalExpense: 0,
+                    balance: 0
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+        }
+
+        // Auth Manager Class
+        class AuthManager {
+            constructor() {
+                this.currentUser = this.loadCurrentUser();
+                this.finViewDB = new FinViewUsersDB();
+            }
+
+            loadCurrentUser() {
+                const stored = localStorage.getItem('FinViewCurrentUser');
+                return stored ? JSON.parse(stored) : null;
+            }
+
+            saveCurrentUser() {
+                if (this.currentUser) {
+                    localStorage.setItem('FinViewCurrentUser', JSON.stringify(this.currentUser));
+                } else {
+                    localStorage.removeItem('FinViewCurrentUser');
+                }
+            }
+
+            signUp(userData) {
+                const newUser = this.finViewDB.addUser(userData);
+                if (newUser) {
+                    this.currentUser = newUser;
+                    this.saveCurrentUser();
+                    return { success: true, user: newUser };
+                }
+                return { success: false, error: 'User already exists' };
+            }
+
+            signIn(email, password) {
+                const user = this.finViewDB.validateUser(email, password);
+                if (user) {
+                    this.currentUser = user;
+                    this.saveCurrentUser();
+                    return { success: true, user: user };
+                }
+                return { success: false, error: 'Invalid credentials' };
+            }
+
+            signInWithGoogle(googleUser) {
+                const user = this.finViewDB.addGoogleUser(googleUser);
+                if (user) {
+                    this.currentUser = user;
+                    this.saveCurrentUser();
+                    return { success: true, user: user };
+                }
+                return { success: false, error: 'Google sign-in failed' };
+            }
+
+            signOut() {
+                this.currentUser = null;
+                this.saveCurrentUser();
+                return true;
+            }
+
+            isLoggedIn() {
+                return this.currentUser !== null;
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+
+            updateCurrentUser(updates) {
+                if (this.currentUser) {
+                    const updatedUser = this.finViewDB.updateUser(this.currentUser.userId, updates);
+                    if (updatedUser) {
+                        this.currentUser = updatedUser;
+                        this.saveCurrentUser();
+                        return updatedUser;
+                    }
+                }
+                return null;
+            }
+        }
+
+        // Initialize FinView DB and Auth Manager
+        const finViewDB = new FinViewUsersDB();
+        const authManager = new AuthManager();
+        // Chart.js Configuration
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false
+                }
+            },
+            elements: {
+                point: {
+                    radius: 0
+                }
+            }
+        };
+
+        // Hero Chart
+        const heroCtx = document.getElementById('heroChart').getContext('2d');
+        new Chart(heroCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    data: [10000, 12000, 15000, 13000, 18000, 22000],
+                    borderColor: '#00E38C',
+                    backgroundColor: 'rgba(0, 227, 140, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // BTC Chart
+        const btcCtx = document.getElementById('btcChart').getContext('2d');
+        new Chart(btcCtx, {
+            type: 'line',
+            data: {
+                labels: ['1D', '2D', '3D', '4D', '5D', '6D'],
+                datasets: [{
+                    data: [4100000, 4150000, 4200000, 4180000, 4220000, 4215890],
+                    borderColor: '#00E38C',
+                    backgroundColor: 'rgba(0, 227, 140, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // NIFTY Chart
+        const niftyCtx = document.getElementById('niftyChart').getContext('2d');
+        new Chart(niftyCtx, {
+            type: 'line',
+            data: {
+                labels: ['1H', '2H', '3H', '4H', '5H', '6H'],
+                datasets: [{
+                    data: [22000, 21900, 21850, 21950, 21800, 21847],
+                    borderColor: '#ff4757',
+                    backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // GOLD Chart
+        const goldCtx = document.getElementById('goldChart').getContext('2d');
+        new Chart(goldCtx, {
+            type: 'line',
+            data: {
+                labels: ['1D', '2D', '3D', '4D', '5D', '6D'],
+                datasets: [{
+                    data: [61500, 62000, 61800, 62200, 62300, 62450],
+                    borderColor: '#00E38C',
+                    backgroundColor: 'rgba(0, 227, 140, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // USD-INR Chart
+        const usdCtx = document.getElementById('usdChart').getContext('2d');
+        new Chart(usdCtx, {
+            type: 'line',
+            data: {
+                labels: ['1D', '2D', '3D', '4D', '5D', '6D'],
+                datasets: [{
+                    data: [83.50, 83.40, 83.30, 83.35, 83.25, 83.24],
+                    borderColor: '#ff4757',
+                    backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Scroll Animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Observe why items
+        document.querySelectorAll('.why-item').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(27, 27, 29, 0.95)';
+                navbar.style.backdropFilter = 'blur(15px)';
+            } else {
+                navbar.style.background = 'rgba(27, 27, 29, 0.8)';
+                navbar.style.backdropFilter = 'blur(10px)';
+            }
+        });
+
+        // Auto-slide testimonials (optional enhancement)
+        let currentTestimonial = 0;
+        const testimonials = document.querySelectorAll('.testimonial-card');
+        
+        function showNextTestimonial() {
+            testimonials.forEach((testimonial, index) => {
+                testimonial.style.opacity = index === currentTestimonial ? '1' : '0.5';
+                testimonial.style.transform = index === currentTestimonial ? 'scale(1.05)' : 'scale(1)';
+            });
+            currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+        }
+
+        // Initialize testimonial slider
+        if (testimonials.length > 0) {
+            setInterval(showNextTestimonial, 3000);
+            showNextTestimonial(); // Show first testimonial
+        }
+
+        // Add hover effects to market cards
+        document.querySelectorAll('.market-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        console.log('FinView website loaded successfully! 🚀');
+
+        // Button Functionality for Home Page
+        
+        // 1️⃣ Start Tracking Button - Redirects to budget-tracker.html
+        document.getElementById("startTrackingBtn").addEventListener("click", () => { 
+            // Log navigation to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Home',
+                        action: 'Button Click',
+                        description: 'Clicked Start Tracking button - navigating to Budget Tracker',
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ Start Tracking button click logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging button click to admin database:', error);
+                }
+            }
+            window.location.href = "budget-tracker.html"; 
+        });
+        
+        // 2️⃣ View Markets Button - Redirects to investment-analytics.html
+        document.getElementById("viewMarketsBtn").addEventListener("click", () => { 
+            // Log navigation to admin database
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                try {
+                    finViewAdminDB.addActivityLog(currentUser.userId, {
+                        page: 'Home',
+                        action: 'Button Click',
+                        description: 'Clicked View Markets button - navigating to Investment Analytics',
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    console.log('✅ View Markets button click logged to Admin Database');
+                } catch (error) {
+                    console.error('Error logging button click to admin database:', error);
+                }
+            }
+            window.location.href = "investment-analytics.html"; 
+        });
+        
+        // 3️⃣ Start Your Financial Journey Button - Dynamic visibility based on login state
+        const journeyBtn = document.getElementById("startJourneyBtn"); 
+        
+        if (authManager.isLoggedIn()) { 
+            journeyBtn.style.display = "none"; 
+        } else { 
+            journeyBtn.style.display = "block"; 
+            journeyBtn.addEventListener("click", () => { 
+                // Log navigation to admin database
+                if (authManager.isLoggedIn()) {
+                    const currentUser = authManager.getCurrentUser();
+                    try {
+                        finViewAdminDB.addActivityLog(currentUser.userId, {
+                            page: 'Home',
+                            action: 'Button Click',
+                            description: 'Clicked Start Your Financial Journey button - navigating to Profile',
+                            userAgent: navigator.userAgent,
+                            url: window.location.href
+                        });
+                        console.log('✅ Start Journey button click logged to Admin Database');
+                    } catch (error) {
+                        console.error('Error logging button click to admin database:', error);
+                    }
+                }
+                window.location.href = "user-profile-dashboard.html"; 
+            }); 
+        }
+
+        // 4️⃣ Personalized welcome message for logged-in users
+        function showPersonalizedWelcome() {
+            if (authManager.isLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                const userName = currentUser.name || 'User';
+                const heroTitle = document.querySelector('.hero-content h1');
+                const heroSubtitle = document.querySelector('.hero-content p');
+                
+                if (heroTitle) {
+                    heroTitle.innerHTML = `Welcome back, <span style="color: var(--mint-neon);">${userName}</span>! 👋`;
+                }
+                
+                if (heroSubtitle) {
+                    heroSubtitle.textContent = `Ready to continue your financial journey, ${userName.split(' ')[0]}? Check your dashboard for the latest insights and updates.`;
+                }
+            }
+        }
+
+        // Show personalized welcome on page load
+        showPersonalizedWelcome();
+        
+        // Log page visit to admin database
+        if (authManager.isLoggedIn()) {
+            const currentUser = authManager.getCurrentUser();
+            try {
+                finViewAdminDB.addActivityLog(currentUser.userId, {
+                    page: 'Home',
+                    action: 'Page Visit',
+                    description: 'User visited Home page',
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                });
+                console.log('✅ Home page visit logged to Admin Database');
+            } catch (error) {
+                console.error('Error logging page visit to admin database:', error);
+            }
+        }
+
+        // Add navigation logging for menu items
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (authManager.isLoggedIn()) {
+                    const currentUser = authManager.getCurrentUser();
+                    const href = this.getAttribute('href');
+                    const pageName = href.replace('.html', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    try {
+                        finViewAdminDB.addActivityLog(currentUser.userId, {
+                            page: 'Home',
+                            action: 'Navigation Click',
+                            description: `Clicked navigation to ${pageName}`,
+                            userAgent: navigator.userAgent,
+                            url: window.location.href
+                        });
+                        console.log(`✅ Navigation to ${pageName} logged to Admin Database`);
+                    } catch (error) {
+                        console.error('Error logging navigation to admin database:', error);
+                    }
+                }
+            });
+        });
+    </script>
+    <script src="auth.js"></script>
+    <script src="finview-admin-db.js"></script>
+</body>
+</html>
